@@ -1,0 +1,2065 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Architecture Decoder: ten software architecture terms, three real questions</title>
+<meta name="description" content="Monorepo, modular monolith, micro-frontends, hexagonal, clean, onion, event-driven, pipeline, layered, distributed. A software architecture field guide that shows these ten terms answer three unrelated questions, with plain-language explanations, three depth levels and worked code examples.">
+<meta name="theme-color" content="#0F1319">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The Architecture Decoder: ten software architecture terms, three real questions">
+<meta property="og:description" content="Software architecture terms are not ten competing options. They answer three unrelated questions. Learn which question each word belongs to and the confusion stops.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Architecture Decoder">
+<meta name="twitter:description" content="Ten software architecture terms. Three real questions. A field guide with ELI5 explanations and three depth levels per concept.">
+<link rel="dns-prefetch" href="https://fonts.gstatic.com">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Instrument+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0F1319; --ink2:#151B24; --ink3:#1C2532;
+  --line:#2A3441; --line2:#3A4757;
+  --paper:#EDE6D6; --paperink:#2B2418;
+  --text:#E7E5E0; --dim:#98A1B1; --dim2:#6C7688;
+  --a1:#8FA6F5; --a2:#E8A94D; --a3:#58C2A0; --warn:#F0776A;
+  --disp:'Bricolage Grotesque','Trebuchet MS','Segoe UI',Roboto,system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;
+  --body:'Instrument Sans','Segoe UI',Roboto,system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,'Liberation Mono','Courier New',monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+body{margin:0;background:var(--ink);color:var(--text);font-family:var(--body);
+  font-size:16.5px;line-height:1.62;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
+  background-image:linear-gradient(var(--line) .5px,transparent .5px),linear-gradient(90deg,var(--line) .5px,transparent .5px);
+  background-size:88px 88px;
+  -webkit-mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,#000 0%,transparent 75%);
+  mask-image:radial-gradient(ellipse 90% 60% at 50% 0%,#000 0%,transparent 75%)}
+
+#prog{position:fixed;top:0;left:0;height:2px;width:0;z-index:80;
+  background:linear-gradient(90deg,var(--a1),var(--a2) 50%,var(--a3));transition:width .12s linear}
+
+#top{position:sticky;top:0;z-index:60;background:rgba(15,19,25,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.topin{max-width:1180px;margin:0 auto;padding:10px 22px;display:flex;align-items:center;gap:18px}
+.brand{font-family:var(--disp);font-weight:800;font-size:15px;letter-spacing:-.02em;white-space:nowrap}
+.brand span{color:var(--dim2);font-family:var(--mono);font-weight:400;font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-left:9px}
+.compass{display:flex;gap:5px;margin-left:auto;align-items:center}
+.compass b{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--dim2);text-transform:uppercase;font-weight:400;margin-right:4px}
+.cbar{width:38px;height:5px;border-radius:3px;background:var(--line);transition:background .3s,box-shadow .3s}
+.cbar.on1{background:var(--a1);box-shadow:0 0 12px -2px var(--a1)}
+.cbar.on2{background:var(--a2);box-shadow:0 0 12px -2px var(--a2)}
+.cbar.on3{background:var(--a3);box-shadow:0 0 12px -2px var(--a3)}
+.tbtn{font-family:var(--mono);font-size:11px;letter-spacing:.04em;background:var(--ink3);color:var(--dim);
+  border:1px solid var(--line2);border-radius:100px;padding:6px 13px;cursor:pointer;transition:.18s;white-space:nowrap}
+.tbtn:hover{color:var(--text);border-color:var(--dim2)}
+.tbtn[aria-pressed="true"]{background:var(--paper);color:var(--paperink);border-color:var(--paper);font-weight:600}
+@media(max-width:880px){.compass b{display:none}.cbar{width:24px}.topin{padding:9px 15px;gap:11px}}
+@media(max-width:560px){.brand span{display:none}.tbtn{padding:5px 10px;font-size:10px}}
+
+.shell{max-width:1180px;margin:0 auto;padding:0 22px;display:grid;grid-template-columns:210px 1fr;gap:44px;position:relative;z-index:1}
+@media(max-width:960px){.shell{grid-template-columns:1fr;gap:0;padding:0 16px}}
+
+#side{position:sticky;top:92px;align-self:start;max-height:calc(100vh - 120px);overflow-y:auto;padding:34px 0 60px;scrollbar-width:thin}
+#side::-webkit-scrollbar{width:3px}
+#side::-webkit-scrollbar-thumb{background:var(--line2);border-radius:3px}
+.navgrp{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim2);margin:22px 0 9px;padding-left:11px}
+.navgrp:first-child{margin-top:0}
+#side a{display:block;font-size:13.2px;color:var(--dim);text-decoration:none;padding:5px 11px;border-left:2px solid var(--line);line-height:1.35;transition:.16s}
+#side a:hover{color:var(--text);border-left-color:var(--dim2)}
+#side a.act{color:var(--text);font-weight:600}
+#side a.act.n1{border-left-color:var(--a1)}
+#side a.act.n2{border-left-color:var(--a2)}
+#side a.act.n3{border-left-color:var(--a3)}
+@media(max-width:960px){#side{display:none}}
+
+main{padding:0 0 100px;min-width:0;max-width:820px}
+.hero{padding:76px 0 54px;border-bottom:1px solid var(--line)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--a2);margin:0 0 20px}
+h1{font-family:var(--disp);font-weight:800;font-size:clamp(38px,7vw,66px);line-height:.98;letter-spacing:-.035em;margin:0 0 22px}
+h1 em{font-style:normal;display:block;color:var(--dim2)}
+.lede{font-size:clamp(17px,2.3vw,19.5px);color:var(--dim);max-width:60ch;margin:0 0 14px;line-height:1.55}
+.lede strong{color:var(--text);font-weight:600}
+
+section{padding:60px 0;border-bottom:1px solid var(--line);scroll-margin-top:70px}
+.sechead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:8px}
+.tag{font-family:var(--mono);font-size:10px;letter-spacing:.11em;text-transform:uppercase;padding:4px 9px;border-radius:4px;border:1px solid;white-space:nowrap}
+.x1 .tag{color:var(--a1);border-color:color-mix(in srgb,var(--a1) 42%,transparent);background:color-mix(in srgb,var(--a1) 9%,transparent)}
+.x2 .tag{color:var(--a2);border-color:color-mix(in srgb,var(--a2) 42%,transparent);background:color-mix(in srgb,var(--a2) 9%,transparent)}
+.x3 .tag{color:var(--a3);border-color:color-mix(in srgb,var(--a3) 42%,transparent);background:color-mix(in srgb,var(--a3) 9%,transparent)}
+.x0 .tag{color:var(--dim);border-color:var(--line2);background:var(--ink2)}
+h2{font-family:var(--disp);font-weight:800;font-size:clamp(27px,4.4vw,38px);letter-spacing:-.03em;line-height:1.08;margin:0 0 6px}
+.sub{color:var(--dim2);font-family:var(--mono);font-size:12.5px;margin:0 0 30px}
+h3{font-family:var(--disp);font-weight:600;font-size:19px;letter-spacing:-.015em;margin:34px 0 10px}
+h4{font-family:var(--disp);font-weight:600;font-size:15.5px;margin:22px 0 8px;letter-spacing:-.01em}
+p{margin:0 0 15px;max-width:66ch}
+strong{font-weight:600;color:#fff}
+a{color:var(--a1)}
+ul{max-width:66ch;padding-left:20px;margin:0 0 15px}
+li{margin-bottom:7px}
+
+.wwh{margin:26px 0}
+.wwh-h{display:flex;align-items:center;gap:11px;margin:0 0 9px}
+.wwh-n{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);background:var(--dim);padding:3px 8px;border-radius:3px;font-weight:600}
+.x1 .wwh-n{background:var(--a1)}.x2 .wwh-n{background:var(--a2)}.x3 .wwh-n{background:var(--a3)}
+.wwh-h h3{margin:0;font-size:18px}
+
+.eli{background:var(--paper);color:var(--paperink);border-radius:3px;margin:24px 0;box-shadow:0 12px 30px -14px rgba(0,0,0,.75);position:relative;overflow:hidden}
+.eli::before{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 27px,rgba(43,36,24,.055) 27px,rgba(43,36,24,.055) 28px)}
+.eli-t{width:100%;background:none;border:0;border-bottom:1px solid rgba(43,36,24,.18);font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:#6B5B3C;padding:11px 18px;display:flex;align-items:center;gap:9px;cursor:pointer;text-align:left;font-weight:600;position:relative;z-index:1}
+.eli-t:hover{color:var(--paperink)}
+.eli-t .chev{margin-left:auto;transition:transform .22s;font-size:13px}
+.eli.open .eli-t .chev{transform:rotate(90deg)}
+.eli-b{padding:16px 18px 19px;position:relative;z-index:1;display:none}
+.eli.open .eli-b{display:block}
+.eli-b p{margin:0 0 11px;font-size:16px;line-height:1.6;max-width:62ch}
+.eli-b p:last-child{margin:0}
+.eli-b strong{color:#4A2F14}
+.eli-b em{font-style:italic;color:#6B5B3C}
+
+pre{background:var(--ink2);border:1px solid var(--line);border-left:3px solid var(--dim2);border-radius:0 6px 6px 0;padding:15px 17px;overflow-x:auto;margin:15px 0;font-family:var(--mono);font-size:12.8px;line-height:1.72;color:#CBD3E0}
+.x1 pre{border-left-color:var(--a1)}.x2 pre{border-left-color:var(--a2)}.x3 pre{border-left-color:var(--a3)}
+pre b{color:#fff;font-weight:600}
+pre i{color:var(--dim2);font-style:normal}
+pre u{text-decoration:none;color:var(--a2)}
+pre s{text-decoration:none;color:var(--warn)}
+pre em{font-style:normal;color:var(--a3)}
+code{font-family:var(--mono);font-size:.885em;background:var(--ink3);padding:1.5px 5px;border-radius:3px;color:#CBD3E0;border:1px solid var(--line)}
+pre code{background:none;border:0;padding:0;font-size:inherit}
+
+.lv{margin:28px 0;border:1px solid var(--line);border-radius:9px;background:var(--ink2);overflow:hidden}
+.lv-bar{display:flex;border-bottom:1px solid var(--line);background:var(--ink);flex-wrap:wrap}
+.lv-bar button{flex:1;min-width:104px;background:none;border:0;border-bottom:2px solid transparent;color:var(--dim2);font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;padding:12px 8px;cursor:pointer;transition:.18s;font-weight:500}
+.lv-bar button:hover{color:var(--text)}
+.lv-bar button[aria-selected="true"]{color:var(--text);background:var(--ink2)}
+.x1 .lv-bar button[aria-selected="true"]{border-bottom-color:var(--a1)}
+.x2 .lv-bar button[aria-selected="true"]{border-bottom-color:var(--a2)}
+.x3 .lv-bar button[aria-selected="true"]{border-bottom-color:var(--a3)}
+.lv-pane{padding:20px 20px 24px;display:none}
+.lv-pane.on{display:block}
+.lv-pane>*:first-child{margin-top:0}
+.lv-pane pre{background:var(--ink)}
+.lvl-note{font-family:var(--mono);font-size:11px;color:var(--dim2);margin:0 0 14px;padding-bottom:12px;border-bottom:1px dashed var(--line)}
+
+.jg{border-bottom:1.5px dotted var(--a2);cursor:help;color:inherit;background:color-mix(in srgb,var(--a2) 7%,transparent);padding:0 1px}
+.jg:hover,.jg:focus{background:color-mix(in srgb,var(--a2) 17%,transparent);outline:none}
+#tip{position:fixed;z-index:200;max-width:310px;background:var(--paper);color:var(--paperink);border-radius:5px;padding:11px 13px;font-size:13.6px;line-height:1.5;display:none;box-shadow:0 18px 44px -14px rgba(0,0,0,.85)}
+#tip .tt{font-family:var(--mono);font-size:10px;letter-spacing:.11em;text-transform:uppercase;color:#6B5B3C;display:block;margin-bottom:5px;font-weight:600}
+
+.recap{border:1px dashed var(--line2);border-radius:8px;padding:17px 19px;margin:28px 0;background:var(--ink2)}
+.recap h4{margin:0 0 12px;font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--a2);font-weight:500}
+.recap dl{margin:0;display:grid;gap:9px}
+.recap dt{font-family:var(--mono);font-size:12.5px;color:var(--text);font-weight:600}
+.recap dd{margin:2px 0 0;font-size:14.6px;color:var(--dim);line-height:1.52}
+
+.note{border-left:3px solid var(--warn);background:color-mix(in srgb,var(--warn) 7%,var(--ink2));padding:14px 17px;border-radius:0 7px 7px 0;margin:22px 0}
+.note p{margin:0;font-size:15.3px}
+.note .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--warn);display:block;margin-bottom:6px;font-weight:600}
+.key{border-left:3px solid var(--a3);background:color-mix(in srgb,var(--a3) 7%,var(--ink2));padding:14px 17px;border-radius:0 7px 7px 0;margin:22px 0}
+.key p{margin:0;font-size:15.6px}
+.key .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--a3);display:block;margin-bottom:6px;font-weight:600}
+
+.tw{overflow-x:auto;margin:24px 0;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%;font-size:14.3px;min-width:560px}
+th{background:var(--ink2);font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);text-align:left;padding:11px 14px;font-weight:500;border-bottom:1px solid var(--line)}
+td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--dim);line-height:1.5}
+tr:last-child td{border-bottom:0}
+td strong{color:var(--text)}
+
+.dg{margin:26px 0;padding:22px;background:var(--ink2);border:1px solid var(--line);border-radius:9px}
+.dg svg{width:100%;height:auto;display:block}
+.dg figcaption{font-family:var(--mono);font-size:11.2px;color:var(--dim2);margin-top:14px;padding-top:12px;border-top:1px dashed var(--line);line-height:1.55}
+.sv-box{fill:var(--ink3);stroke:var(--line2);stroke-width:1}
+.sv-t{fill:var(--text);font-family:var(--mono);font-size:12px}
+.sv-s{fill:var(--dim2);font-family:var(--mono);font-size:10.5px}
+.sv-l{stroke:var(--dim2);stroke-width:1.3;fill:none}
+
+.wiz{background:var(--ink2);border:1px solid var(--line2);border-radius:12px;padding:24px;margin:28px 0}
+.wq{margin-bottom:22px}
+.wq>p{font-family:var(--disp);font-weight:600;font-size:16px;margin:0 0 11px;color:var(--text)}
+.wopts{display:flex;flex-wrap:wrap;gap:8px}
+.wopts button{background:var(--ink);border:1px solid var(--line2);color:var(--dim);border-radius:7px;padding:9px 14px;font-family:var(--body);font-size:14px;cursor:pointer;transition:.18s}
+.wopts button:hover{border-color:var(--dim);color:var(--text)}
+.wopts button[aria-pressed="true"]{background:var(--paper);color:var(--paperink);border-color:var(--paper);font-weight:600}
+#wout{margin-top:8px;padding:19px;border-radius:9px;background:var(--ink);border:1px dashed var(--line2);font-size:15.4px;color:var(--dim);line-height:1.6}
+#wout .verdict{font-family:var(--disp);font-weight:800;font-size:19px;color:var(--text);display:block;margin-bottom:10px;letter-spacing:-.02em;line-height:1.25}
+
+.qz{border:1px solid var(--line);border-radius:9px;padding:19px 21px;margin:20px 0;background:var(--ink2)}
+.qz>p{font-family:var(--disp);font-weight:600;font-size:16.5px;margin:0 0 13px}
+.qopts{display:grid;gap:7px}
+.qopts button{text-align:left;background:var(--ink);border:1px solid var(--line);color:var(--dim);border-radius:7px;padding:10px 14px;font-family:var(--body);font-size:14.6px;cursor:pointer;transition:.16s}
+.qopts button:hover:not([disabled]){border-color:var(--dim2);color:var(--text)}
+.qopts button.right{border-color:var(--a3);background:color-mix(in srgb,var(--a3) 12%,var(--ink));color:var(--text)}
+.qopts button.wrong{border-color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,var(--ink));color:var(--text)}
+.qfb{margin-top:12px;font-size:14.6px;color:var(--dim);display:none;padding-top:12px;border-top:1px dashed var(--line);line-height:1.55}
+.qfb.on{display:block}
+
+#gsearch{width:100%;background:var(--ink2);border:1px solid var(--line2);border-radius:8px;padding:12px 15px;color:var(--text);font-family:var(--body);font-size:15px;margin-bottom:16px}
+#gsearch:focus{outline:none;border-color:var(--a2)}
+.gl{display:grid;gap:8px}
+.gitem{border:1px solid var(--line);border-radius:8px;background:var(--ink2);padding:15px 18px}
+.gitem dt{font-family:var(--mono);font-size:13.5px;color:var(--text);font-weight:600;margin-bottom:5px}
+.gitem dd{margin:0;font-size:15px;color:var(--dim);line-height:1.55}
+
+footer{padding:44px 0 20px;color:var(--dim2);font-family:var(--mono);font-size:11.5px;line-height:1.7}
+:focus-visible{outline:2px solid var(--a2);outline-offset:3px;border-radius:3px}
+
+.res{display:grid;gap:9px;margin:16px 0 30px}
+.ritem{display:block;border:1px solid var(--line);border-left:3px solid var(--dim2);border-radius:0 8px 8px 0;background:var(--ink2);padding:13px 16px;text-decoration:none;transition:.16s}
+.ritem:hover{border-color:var(--line2);background:var(--ink3)}
+.ritem b{display:block;color:var(--text);font-family:var(--disp);font-weight:600;font-size:15.5px;margin-bottom:3px;letter-spacing:-.01em}
+.ritem em{display:block;color:var(--dim);font-size:14.2px;line-height:1.5;font-style:normal}
+.ritem cite{display:block;font-family:var(--mono);font-size:10.5px;color:var(--dim2);font-style:normal;margin-top:7px;letter-spacing:.04em;word-break:break-all}
+.r1{border-left-color:var(--a1)}.r2{border-left-color:var(--a2)}.r3{border-left-color:var(--a3)}
+.books{border:1px dashed var(--line2);border-radius:8px;padding:17px 20px;background:var(--ink2)}
+.books h4{margin:0 0 11px;font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--a2);font-weight:500}
+.books ul{margin:0;padding-left:18px}
+.books li{font-size:14.6px;color:var(--dim);margin-bottom:9px;line-height:1.5}
+.books li:last-child{margin-bottom:0}
+.books strong{color:var(--text)}
+
+.demo{margin:28px 0;border:1px solid var(--line2);border-radius:11px;background:var(--ink2);overflow:hidden}
+.demo-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:13px 17px;border-bottom:1px solid var(--line);background:var(--ink)}
+.demo-lbl{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--a2);font-weight:500}
+.demo-toggle{display:flex;margin-left:auto;background:var(--ink3);border-radius:100px;padding:3px;gap:2px;border:1px solid var(--line)}
+.demo-toggle button{border:0;background:none;color:var(--dim2);font-family:var(--mono);font-size:11px;padding:6px 13px;border-radius:100px;cursor:pointer;transition:.18s;white-space:nowrap}
+.demo-toggle button[aria-pressed="true"]{background:var(--paper);color:var(--paperink);font-weight:600}
+.demo-stage{padding:18px 17px 6px}
+.demo-stage svg{width:100%;height:auto;display:block}
+.dnode rect{fill:var(--ink3);stroke:var(--line2);stroke-width:1;transition:fill .3s,stroke .3s}
+.dnode text{fill:var(--dim);font-family:var(--mono);font-size:12.5px;transition:fill .3s}
+.dnode.hot rect{fill:color-mix(in srgb,var(--warn) 22%,var(--ink3));stroke:var(--warn)}
+.dnode.hot text{fill:#fff}
+.dnode.src rect{fill:color-mix(in srgb,var(--a2) 22%,var(--ink3));stroke:var(--a2)}
+.dnode.src text{fill:#fff}
+.dedge{stroke:var(--line2);stroke-width:1.4;fill:none;transition:stroke .3s,opacity .3s}
+.dedge.hot{stroke:var(--warn);opacity:1}
+.demo-scen{display:flex;flex-wrap:wrap;gap:7px;padding:10px 17px 15px;border-bottom:1px solid var(--line)}
+.demo-scen button{background:var(--ink);border:1px solid var(--line);color:var(--dim);border-radius:7px;padding:8px 13px;font-family:var(--body);font-size:13.5px;cursor:pointer;transition:.16s;text-align:left}
+.demo-scen button:hover{border-color:var(--dim2);color:var(--text)}
+.demo-scen button[aria-pressed="true"]{border-color:var(--a2);background:color-mix(in srgb,var(--a2) 11%,var(--ink));color:var(--text)}
+.demo-out{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-bottom:1px solid var(--line)}
+.dstat{background:var(--ink2);padding:14px 16px}
+.dstat b{display:block;font-family:var(--disp);font-weight:800;font-size:25px;color:var(--warn);letter-spacing:-.02em;line-height:1.1;transition:color .3s}
+.dstat.ok b{color:var(--a3)}
+.dstat span{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.09em;text-transform:uppercase;color:var(--dim2);margin-top:4px}
+.demo-body{padding:16px 17px 18px}
+.demo-body pre{margin:0 0 13px;background:var(--ink)}
+.dverdict{margin:0;font-size:15px;line-height:1.55;color:var(--dim)}
+.dverdict b{color:var(--text)}
+@media(max-width:560px){.demo-out{grid-template-columns:1fr 1fr}.demo-scen button{font-size:12.5px;padding:7px 11px}}
+
+footer{padding:46px 0 64px;color:var(--dim2);font-family:var(--mono);font-size:11.5px;line-height:1.7}
+.fnote{max-width:62ch;margin:0 0 24px}
+.fauth{display:flex;align-items:center;gap:13px;flex-wrap:wrap;padding-top:22px;border-top:1px solid var(--line)}
+.fby{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim2)}
+.fname{font-family:var(--disp);font-weight:600;font-size:17px;color:var(--text);letter-spacing:-.015em}
+.flink{display:inline-flex;align-items:center;gap:7px;margin-left:auto;color:var(--dim);text-decoration:none;
+  border:1px solid var(--line2);border-radius:100px;padding:7px 15px;transition:.16s;
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.03em}
+.flink:hover{color:var(--text);border-color:var(--a1);background:color-mix(in srgb,var(--a1) 12%,transparent)}
+.flink svg{width:12px;height:12px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:520px){.flink{margin-left:0}}
+
+.byline{display:flex;align-items:center;gap:13px;flex-wrap:wrap;margin-top:34px;padding-top:24px;border-top:1px solid var(--line)}
+@media(max-width:520px){.byline .flink{margin-left:0}}
+
+.fbars{display:flex;gap:5px;margin-bottom:24px}
+.fbars i{width:40px;height:5px;border-radius:3px;display:block}
+.fbars i:nth-child(1){background:var(--a1)}
+.fbars i:nth-child(2){background:var(--a2)}
+.fbars i:nth-child(3){background:var(--a3)}
+.slogan{font-family:var(--disp);font-weight:800;font-size:clamp(23px,3.8vw,33px);line-height:1.1;
+  letter-spacing:-.032em;color:var(--text);max-width:19ch;margin:0 0 18px}
+#totop{position:fixed;right:22px;bottom:22px;z-index:70;width:44px;height:44px;border-radius:50%;
+  display:grid;place-items:center;cursor:pointer;background:var(--ink3);border:1px solid var(--line2);
+  color:var(--dim);opacity:0;visibility:hidden;transform:translateY(10px);
+  transition:opacity .25s,transform .25s,visibility .25s,color .16s,border-color .16s,background .16s}
+#totop.on{opacity:1;visibility:visible;transform:none}
+#totop:hover{color:var(--text);border-color:var(--a2);background:color-mix(in srgb,var(--a2) 14%,var(--ink3))}
+#totop svg{width:17px;height:17px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
+@media(max-width:560px){#totop{right:14px;bottom:14px;width:40px;height:40px}}
+</style>
+</head>
+<body>
+<div id="prog"></div>
+<div id="tip" role="tooltip"></div>
+
+<header id="top">
+  <div class="topin">
+    <div class="brand">The Architecture Decoder<span>3 axes / 10 words</span></div>
+    <button class="tbtn" id="eliAll" aria-pressed="false">Open all ELI5</button>
+    <div class="compass" aria-hidden="true">
+      <b>Axis</b>
+      <div class="cbar" id="cb1" title="Axis 1: repo"></div>
+      <div class="cbar" id="cb2" title="Axis 2: deployment"></div>
+      <div class="cbar" id="cb3" title="Axis 3: internal"></div>
+    </div>
+  </div>
+</header>
+
+<div class="shell">
+<nav id="side" aria-label="Contents">
+  <div class="navgrp">Start</div>
+  <a href="#start" data-ax="0">The whole idea</a>
+  <div class="navgrp">Axis 1: Repo</div>
+  <a href="#repo" data-ax="1">Monorepo vs polyrepo</a>
+  <div class="navgrp">Axis 2: Deployment</div>
+  <a href="#monolith" data-ax="2">Modular monolith</a>
+  <a href="#distributed" data-ax="2">Distributed architecture</a>
+  <a href="#mfe-build" data-ax="2">Build-time micro-frontends</a>
+  <a href="#mfe-run" data-ax="2">Runtime micro-frontends</a>
+  <div class="navgrp">Axis 3: Inside</div>
+  <a href="#hex" data-ax="3">Hexagonal / Onion / Clean</a>
+  <a href="#layered" data-ax="3">Layered &amp; GUI</a>
+  <a href="#events" data-ax="3">Event-driven</a>
+  <a href="#pipeline" data-ax="3">Pipeline</a>
+  <div class="navgrp">Decide &amp; test</div>
+  <a href="#wizard" data-ax="0">Pick yours</a>
+  <a href="#quiz" data-ax="0">Test yourself</a>
+  <a href="#glossary" data-ax="0">Jargon glossary</a>
+  <a href="#reading" data-ax="0">Further reading</a>
+</nav>
+<main>
+<div class="hero">
+  <p class="eyebrow">A field guide to software architecture</p>
+  <h1>Ten architecture words.<em>Three real questions.</em></h1>
+  <p class="lede">Monorepo. Modular monolith. Micro-frontends. Hexagonal, Clean and Onion Architecture. Event-driven, pipeline, layered, distributed. Every architecture discussion drags in these ten terms as though you have to pick a side.</p>
+  <p class="lede"><strong>You do not. They answer three unrelated questions,</strong> and most of them were never alternatives to each other. Learn which question each word belongs to and the confusion stops for good.</p>
+  <p class="lede">Every concept below comes with a plain-language explanation, three depth levels from beginner to advanced, working code, and an interactive demo of the problem it solves.</p>
+
+  <div class="byline">
+    <span class="fby">Written by</span>
+    <span class="fname">Rachit Thariani</span>
+    <a class="flink" href="https://www.linkedin.com/in/rachit-thariani/" target="_blank" rel="noopener">
+      LinkedIn
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4L10 14"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
+    </a>
+  </div>
+</div>
+
+<section id="start" class="x0">
+  <div class="sechead"><span class="tag">Orientation</span></div>
+  <h2>The three axes</h2>
+  <p class="sub">Read this once. Everything below hangs off it.</p>
+
+  <p>Picture building a business park. Three separate decisions, none of which constrains the others:</p>
+  <ul>
+    <li><strong>The filing cabinet</strong> where blueprints are stored: one cabinet or several? That is your <em>repo</em> question.</li>
+    <li><strong>The buildings you actually construct</strong>: one big building, or five connected by paths? That is your <em>deployment</em> question.</li>
+    <li><strong>How rooms are arranged inside</strong> any given building, where the plumbing runs, which room opens into which. That is your <em>internal structure</em> question.</li>
+  </ul>
+  <p>You can keep blueprints for five buildings in one cabinet. You can spread one building's blueprints across five cabinets. The cabinets have nothing to do with the buildings. That is why "monorepo" and "monolith" are unrelated despite sharing a prefix.</p>
+
+  <figure class="dg">
+  <svg viewBox="0 0 700 250" role="img" aria-label="Three axes, each with its own options">
+    <text class="sv-t" x="0" y="34">AXIS 1</text><text class="sv-s" x="0" y="50">where code lives</text>
+    <rect class="sv-box" style="stroke:var(--a1)" x="135" y="14" width="170" height="52" rx="7"/>
+    <text class="sv-t" x="220" y="44" text-anchor="middle">Monorepo</text>
+    <rect class="sv-box" style="stroke:var(--a1)" x="320" y="14" width="170" height="52" rx="7"/>
+    <text class="sv-t" x="405" y="44" text-anchor="middle">Polyrepo</text>
+
+    <text class="sv-t" x="0" y="114">AXIS 2</text><text class="sv-s" x="0" y="130">what you deploy</text>
+    <rect class="sv-box" style="stroke:var(--a2)" x="135" y="94" width="170" height="52" rx="7"/>
+    <text class="sv-t" x="220" y="118" text-anchor="middle">Modular monolith</text>
+    <text class="sv-s" x="220" y="134" text-anchor="middle">1 deploy unit</text>
+    <rect class="sv-box" style="stroke:var(--a2)" x="320" y="94" width="170" height="52" rx="7"/>
+    <text class="sv-t" x="405" y="118" text-anchor="middle">Build-time MFEs</text>
+    <text class="sv-s" x="405" y="134" text-anchor="middle">1 deploy unit</text>
+    <rect class="sv-box" style="stroke:var(--a2)" x="505" y="94" width="170" height="52" rx="7"/>
+    <text class="sv-t" x="590" y="118" text-anchor="middle">Runtime MFEs</text>
+    <text class="sv-s" x="590" y="134" text-anchor="middle">many deploy units</text>
+
+    <text class="sv-t" x="0" y="194">AXIS 3</text><text class="sv-s" x="0" y="210">code inside a unit</text>
+    <rect class="sv-box" style="stroke:var(--a3)" x="135" y="174" width="170" height="52" rx="7"/>
+    <text class="sv-t" x="220" y="204" text-anchor="middle">Hexagonal / Clean</text>
+    <rect class="sv-box" style="stroke:var(--a3)" x="320" y="174" width="170" height="52" rx="7"/>
+    <text class="sv-t" x="405" y="204" text-anchor="middle">Layered / Tiers</text>
+    <rect class="sv-box" style="stroke:var(--a3)" x="505" y="174" width="170" height="52" rx="7"/>
+    <text class="sv-t" x="590" y="204" text-anchor="middle">Events / Pipeline</text>
+  </svg>
+  <figcaption>You pick one from each row. "Modular monolith in a monorepo with hexagonal modules" is one coherent sentence, not three competing choices.</figcaption>
+  </figure>
+
+  <div class="eli"><button class="eli-t">Explain like I'm five <span class="chev">›</span></button><div class="eli-b">
+    <p>Imagine your toys.</p>
+    <p><strong>Question one:</strong> do you keep all your toys in one big box, or a separate box for each kind of toy? That is the <strong>repo</strong> question. It is only about storage.</p>
+    <p><strong>Question two:</strong> when you build a castle, is it one giant castle, or five small castles standing apart? That is the <strong>deployment</strong> question. It is about how many separate things exist when you actually play.</p>
+    <p><strong>Question three:</strong> inside one castle, where do you put the kitchen and the throne room? That is the <strong>internal structure</strong> question.</p>
+    <p>Here is the part grown-ups get wrong: <em>keeping all toys in one box does not mean you build one castle.</em> They are separate choices. Big box, five castles is perfectly fine.</p>
+  </div></div>
+
+  <div class="key"><span class="lbl">The one rule</span><p>Before you compare two architecture words, ask which axis each belongs to. If they are on different axes, they are not alternatives and comparing them is a category error.</p></div>
+
+  <h3>One more distinction: style, pattern, tool</h3>
+  <p>The three axes tell you <em>which question</em> a word answers. This tells you <em>what kind of thing</em> the word is, and it prevents a second, very common category error.</p>
+
+  <div class="tw"><table>
+    <thead><tr><th>Level</th><th>What it is</th><th>Examples on this page</th></tr></thead>
+    <tbody>
+    <tr><td><strong>Style</strong></td><td>The overall shape of a system or of a unit inside it</td><td>modular monolith, microservices, runtime micro-frontends, layered, event-driven, pipeline, Hexagonal Architecture</td></tr>
+    <tr><td><strong>Pattern</strong></td><td>A reusable solution to a recurring problem within a style</td><td>ports and adapters, saga, transactional outbox, circuit breaker, BFF, reducer, dead-letter queue</td></tr>
+    <tr><td><strong>Tool</strong></td><td>A concrete product that implements a style or a pattern</td><td>Nx, Turborepo, Module Federation, Kafka, BullMQ, Prisma, Redux</td></tr>
+    </tbody>
+  </table></div>
+
+  <p>Arguments get stuck when people compare across levels without noticing. <em>"Should we use microservices or Kafka?"</em> is not a question with an answer, because one is a style and the other is a tool you could use in either style. Neither is <em>"hexagonal or Prisma"</em>.</p>
+
+  <p>The trap runs the other way too. Tools get spoken about as though they were architectures, usually because the tool arrived first and the vocabulary followed. Module Federation is the clearest case: it is a bundler feature, not a way of designing software. The style is runtime micro-frontends, and you could implement that style with import maps, single-spa, web components or plain iframes instead.</p>
+
+  <div class="key"><span class="lbl">Two questions, not one</span><p>Before comparing two terms, ask which axis each belongs to, then ask which level each sits at. If either answer differs, they were never competing.</p></div>
+</section>
+
+<section id="repo" class="x1">
+  <div class="sechead"><span class="tag">Axis 1 · where code lives</span></div>
+  <h2>Monorepo vs polyrepo</h2>
+  <p class="sub">The cheapest decision on the page. Answer it in ten seconds.</p>
+
+  <div class="wwh"><div class="wwh-h"><span class="wwh-n">Why</span><h3>Why this exists at all</h3></div>
+  <p>A product is rarely one program. You have an API, a website, an admin console, some shared code, some infrastructure config. Those files have to live somewhere in version control, and someone has to decide whether they share a repository or get their own.</p>
+  <p>Get it wrong toward polyrepo and a one-line change to a shared type becomes a four-repository, four-pull-request afternoon. Get it wrong toward monorepo without tooling and your CI runs the whole test suite for a typo in the README.</p></div>
+
+  <div class="wwh"><div class="wwh-h"><span class="wwh-n">What it does</span><h3>What each choice actually gives you</h3></div>
+  <p>A <strong>monorepo</strong> is one repository holding many projects. One clone gets you everything. Changes that touch several projects land in a single atomic commit, so the codebase is never in a half-updated state.</p>
+  <p>A <strong>polyrepo</strong> (also called multi-repo) gives each project its own repository. Shared code becomes a published package that others install by version number.</p>
+  <p>Neither one says anything about how many servers you run. Google uses a monorepo and runs thousands of separate services. Netflix uses polyrepo. All four combinations exist in production somewhere.</p></div>
+
+  <div class="wwh"><div class="wwh-h"><span class="wwh-n">How</span><h3>How you actually set it up</h3></div>
+  <p>For a monorepo you need a workspace tool so that builds and tests only run for what changed. Pick one: Nx, Turborepo, Bazel, or plain pnpm workspaces for small setups. Then add a CODEOWNERS file so the right people review the right folders.</p>
+  <p>For polyrepo you need a package registry (npm, Artifactory, GitHub Packages) and a versioning discipline, because now every shared change is a version bump followed by upgrades in each consumer.</p></div>
+
+  <div class="eli"><button class="eli-t">Explain like I'm five <span class="chev">›</span></button><div class="eli-b">
+    <p>You and three friends are drawing a comic book together.</p>
+    <p><strong>Monorepo</strong> is one shared notebook. Everyone draws in the same notebook. If you change a character's hat on page 2, you can fix it on page 9 at the same time, in one go. But everyone has to be careful not to scribble on each other's pages.</p>
+    <p><strong>Polyrepo</strong> is a notebook each. Very tidy, nobody scribbles on anyone. But if the hat changes, you have to walk to each friend and ask them to update their notebook, and some of them will forget.</p>
+    <p>Most small teams are happier with one shared notebook.</p>
+  </div></div>
+
+  <div class="lv" data-lv>
+    <div class="lv-bar" role="tablist">
+      <button role="tab" aria-selected="true">Basic</button>
+      <button role="tab" aria-selected="false">Intermediate</button>
+      <button role="tab" aria-selected="false">Advanced</button>
+    </div>
+    <div class="lv-pane on" role="tabpanel">
+      <p class="lvl-note">Level 1: just look at what is on disk.</p>
+      <p>Forget theory. Run <code>git clone</code> and look at the folder. That tells you which one you have.</p>
+      <p><strong>Monorepo</strong>: one clone, everything inside:</p>
+<pre><b>opsvo/</b>              <i>← a single git repository</i>
+  apps/
+    api/
+    storefront/
+    admin-console/
+  packages/
+    ui/
+    shared-types/</pre>
+      <p><strong>Polyrepo</strong>: four separate clones:</p>
+<pre><b>opsvo-api/</b>          <i>← repo 1</i>
+<b>opsvo-storefront/</b>   <i>← repo 2</i>
+<b>opsvo-admin/</b>        <i>← repo 3</i>
+<b>opsvo-ui/</b>           <i>← repo 4, published to npm</i></pre>
+      <p>That is the whole distinction. Notice you cannot tell from either picture how many servers run in production, because the repo layout does not decide that.</p>
+    </div>
+    <div class="lv-pane" role="tabpanel">
+      <p class="lvl-note">Level 2: the workspace wiring that makes a monorepo bearable.</p>
+      <p>In a monorepo, apps reference shared packages by name, and the workspace tool links them on disk instead of downloading from a registry. No version numbers, no publishing.</p>
+<pre><i>// pnpm-workspace.yaml</i>
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+<i>// apps/api/package.json</i>
+{
+  "dependencies": {
+    <u>"@opsvo/shared-types": "workspace:*"</u>   <i>← linked locally, not downloaded</i>
+  }
+}</pre>
+      <p>The payoff is the atomic commit. Change a type and its consumer together, and CI verifies the whole thing at once:</p>
+<pre>$ git commit -m "add currency to Order"
+  <em>modified: packages/shared-types/order.ts</em>
+  <em>modified: apps/api/src/orders/create.ts</em>
+  <em>modified: apps/storefront/src/cart.tsx</em>
+<i># one commit. one review. never half-migrated.</i></pre>
+      <p>In polyrepo that same change is three pull requests plus a version bump, and there is a window where the published package and its consumers disagree.</p>
+    </div>
+    <div class="lv-pane" role="tabpanel">
+      <p class="lvl-note">Level 3: what breaks at scale, and how teams fix it.</p>
+      <p>Monorepos fail on CI time. The fix is an affected graph: the tool computes which projects depend on the changed files and only builds those.</p>
+<pre>$ npx nx affected --target=test --base=origin/main
+
+  <em>✓ shared-types  (changed)</em>
+  <em>✓ api           (depends on shared-types)</em>
+  <i>- storefront     skipped, not affected</i>
+  <i>- admin-console  skipped, not affected</i>
+
+<i># 2 of 4 projects built. this is why the tooling exists.</i></pre>
+      <p>Three more things serious monorepos add:</p>
+      <ul>
+        <li><strong>Remote build cache</strong>: a task with identical inputs is never rebuilt, on any machine. CI restores the previous output instead.</li>
+        <li><strong>Module boundary rules</strong>: a lint rule that fails the build when a project imports something it should not. This is what stops a monorepo becoming a mud ball.</li>
+        <li><strong>Sparse checkout</strong>: at Google scale nobody clones everything; you materialise only the paths you touch.</li>
+      </ul>
+      <p>Here is a boundary rule, which matters far more than it looks. It is the same idea that will make modular monoliths work later:</p>
+<pre><i>// .eslintrc: nx enforce-module-boundaries</i>
+{
+  "sourceTag": <b>"scope:storefront"</b>,
+  "onlyDependOnLibsWithTags": [<b>"scope:shared"</b>]
+}
+
+<i>// storefront importing from admin now fails CI:</i>
+<s>import { AuditLog } from '@opsvo/admin/internals'</s>
+   <s>✗ scope:storefront cannot depend on scope:admin</s></pre>
+      <p>The polyrepo failure mode is the mirror image: no CI problem, but a "diamond dependency" mess where two services need incompatible versions of the same shared library, and nobody can upgrade without coordinating a release train.</p>
+    </div>
+  </div>
+
+  <div class="recap"><h4>Jargon used in this section</h4><dl>
+    <dt>monorepo</dt><dd>One version-control repository holding many projects. Storage only: it says nothing about deployment.</dd>
+    <dt>polyrepo / multi-repo</dt><dd>One repository per project. Shared code becomes a published, versioned package.</dd>
+    <dt>atomic commit</dt><dd>A single commit that changes several projects together, so the codebase is never half-updated.</dd>
+    <dt>affected graph</dt><dd>The tool's calculation of which projects depend on your changed files, so CI builds only those.</dd>
+    <dt>diamond dependency</dt><dd>Two things you depend on need conflicting versions of the same third thing. The classic polyrepo pain.</dd>
+  </dl></div>
+
+  <div class="note"><span class="lbl">Common mix-up</span><p>Monorepo does not mean monolith. Monorepo is a storage choice; monolith is a deployment choice. If you remember nothing else from this section, remember that they share a prefix and nothing else.</p></div>
+</section>
+<section id="monolith" class="x2">
+  <div class="sechead"><span class="tag">Axis 2 · what you deploy</span></div>
+  <h2>Modular monolith</h2>
+  <p class="sub">One deployable thing. Many enforced compartments inside it.</p>
+
+  <div class="wwh"><div class="wwh-h"><span class="wwh-n">Why</span><h3>Why not just a plain monolith</h3></div>
+  <p>A plain monolith works fine until it does not. What kills it is not size, it is entanglement: the orders code reads the inventory tables directly, the billing code imports a helper from shipping, and after two years every change touches everything. Nobody can reason about one part in isolation, and nobody can extract one part later.</p>
+  <p>A modular monolith keeps the operational simplicity of one deployment while refusing that entanglement. It buys you the ability to split later without committing to distribution now.</p></div>
+
+  <figure class="demo" id="tangle">
+    <div class="demo-head">
+      <span class="demo-lbl">Interactive: change one thing</span>
+      <div class="demo-toggle" role="group" aria-label="Architecture mode">
+        <button data-mode="tangled" aria-pressed="true">Tangled monolith</button>
+        <button data-mode="modular" aria-pressed="false">Modular monolith</button>
+      </div>
+    </div>
+    <div class="demo-stage">
+      <svg viewBox="0 0 640 250" role="img" aria-label="Five modules of an online store and the dependencies between them">
+        <g id="dEdges"></g><g id="dNodes"></g>
+      </svg>
+    </div>
+    <div class="demo-scen" role="group" aria-label="Pick a change">
+      <button data-s="0" aria-pressed="true">Rename a column in inventory</button>
+      <button data-s="1">Swap the payment provider</button>
+      <button data-s="2">Move inventory to its own service</button>
+    </div>
+    <div class="demo-out">
+      <div class="dstat"><b id="dA">4</b><span>modules broken</span></div>
+      <div class="dstat"><b id="dB">11</b><span>files to change</span></div>
+      <div class="dstat"><b id="dC">Days</b><span>realistic effort</span></div>
+    </div>
+    <div class="demo-body">
+      <pre id="dCode"></pre>
+      <p class="dverdict" id="dVerdict"></p>
+    </div>
+    <figcaption style="padding:0 17px 15px;font-family:var(--mono);font-size:11px;color:var(--dim2);line-height:1.55">An online store with five modules. Flip the toggle and pick a change to see how far it travels. File counts are illustrative, the failure shape is not.</figcaption>
+  </figure>
+
+
+  <div class="wwh"><div class="wwh-h"><span class="wwh-n">What it does</span><h3>What it actually is</h3></div>
+  <p>One process, one deployable artifact, one database connection. Inside it, modules that each own their data and expose an explicit, narrow interface. Modules talk through those interfaces or through in-process events, never by reaching into each other's tables or internal files.</p>
+  <p>Everything ships together. Fix a checkout bug, rebuild the one image, redeploy. Checkout, orders and catalog all restart, because they are the same process.</p></div>
+
+  <div class="wwh"><div class="wwh-h"><span class="wwh-n">How</span><h3>How you enforce the boundaries</h3></div>
+  <p>This is the whole discipline, and it is mechanical. Folder structure alone always decays, so you need three things:</p>
+  <ul>
+    <li>A single public entry file per module. Everything else in that folder is private.</li>
+    <li>A lint rule in CI that fails on deep imports past that entry file.</li>
+    <li>Data ownership: each module's tables are touched only by that module. No cross-module joins.</li>
+  </ul></div>
+
+  <div class="eli"><button class="eli-t">Explain like I'm five <span class="chev">›</span></button><div class="eli-b">
+    <p>Think of a big house with rooms. Everyone lives in the same house: one front door, one address.</p>
+    <p>A <strong>messy monolith</strong> is a house with no walls. Someone's socks end up in the kitchen. Change one thing and you trip over something in another room.</p>
+    <p>A <strong>modular monolith</strong> is the same house, but each room has a door, and there is a rule: you knock, you do not climb through the window. You also do not take things out of someone's cupboard: you ask them and they hand it to you.</p>
+    <p>It is still one house. But because everyone knocks, you could one day move a room into its own little cottage without the whole house falling down.</p>
+  </div></div>
+
+  <div class="lv" data-lv>
+    <div class="lv-bar" role="tablist">
+      <button role="tab" aria-selected="true">Basic</button>
+      <button role="tab" aria-selected="false">Intermediate</button>
+      <button role="tab" aria-selected="false">Advanced</button>
+    </div>
+    <div class="lv-pane on" role="tabpanel">
+      <p class="lvl-note">Level 1: the folder shape and the one rule.</p>
+<pre>src/
+  modules/
+    <b>orders/</b>
+      index.ts        <i>← the ONLY file others may import</i>
+      service.ts      <i>← private</i>
+      repository.ts   <i>← private</i>
+    <b>inventory/</b>
+      index.ts
+      service.ts</pre>
+      <p>Legal:</p>
+<pre><em>import { placeOrder } from '../orders'</em>          <i>✓ goes through index.ts</i></pre>
+      <p>Illegal:</p>
+<pre><s>import { OrderRepo } from '../orders/repository'</s>  <i>✗ reaches inside</i></pre>
+      <p>That is it. One public door per module, and everything else is behind it.</p>
+    </div>
+    <div class="lv-pane" role="tabpanel">
+      <p class="lvl-note">Level 2: making the rule real instead of aspirational.</p>
+      <p>A rule nobody checks is a suggestion. Put it in CI with dependency-cruiser or an ESLint boundaries plugin:</p>
+<pre><i>// .dependency-cruiser.js</i>
+{
+  name: <b>'no-deep-module-imports'</b>,
+  severity: 'error',
+  from: { path: '^src/modules/([^/]+)/' },
+  to:   {
+    path: '^src/modules/([^/]+)/.+',
+    pathNot: '^src/modules/$1/',      <i>own folder is fine</i>
+    <u>pathNot: '^src/modules/[^/]+/index.ts$'</u>  <i>public door is fine</i>
+  }
+}</pre>
+      <p>Then the data half, which people skip and later regret. Each module gets its own schema, so a cross-module join is not merely discouraged: it is visible in the SQL:</p>
+<pre><i>// prisma/schema.prisma</i>
+model Order {
+  id     String @id
+  <em>@@schema("orders")</em>
+}
+model StockItem {
+  id     String @id
+  <em>@@schema("inventory")</em>
+}
+
+<i>-- this now looks obviously wrong in a code review:</i>
+<s>SELECT * FROM orders.order o JOIN inventory.stock_item s ...</s></pre>
+      <p>Modules ask each other in code, not in SQL:</p>
+<pre><i>// orders/service.ts</i>
+<em>const ok = await inventory.reserve(items)</em>   <i>← a normal function call</i></pre>
+    </div>
+    <div class="lv-pane" role="tabpanel">
+      <p class="lvl-note">Level 3: designing for the extraction you may never do.</p>
+      <p>The advanced move is to make every cross-module call look exactly like a network call would, without being one. Define the contract as an interface, inject the implementation:</p>
+<pre><i>// orders/ports.ts: orders declares what it NEEDS</i>
+export interface InventoryPort {
+  reserve(items: LineItem[]): Promise&lt;Reservation&gt;
+}
+
+<i>// wiring/container.ts, today it is in-process</i>
+const inventoryPort: InventoryPort = <em>new LocalInventoryAdapter(inventoryService)</em>
+
+<i>// tomorrow, if you ever extract it: one line changes</i>
+const inventoryPort: InventoryPort = <u>new HttpInventoryAdapter('https://inventory.internal')</u></pre>
+      <p>Because the call was always async and always went through an interface, extraction becomes configuration rather than a rewrite. But note carefully what that one line silently introduces:</p>
+      <ul>
+        <li>The call can now time out, and you will not know whether the reservation happened.</li>
+        <li>You need a retry policy, and therefore an <strong>idempotency key</strong> so a retry does not double-reserve.</li>
+        <li>You lose the shared database transaction that used to make order-plus-reservation atomic.</li>
+      </ul>
+      <p>Which is why the honest advice is: build the seam, then do not use it until something forces you. Keep a checklist of what a module must satisfy before it earns extraction: owns its tables, no shared transactions with others, communicates only through its port, has its own metrics.</p>
+      <p>The transactional point is the one that bites hardest. In-process you get this for free:</p>
+<pre>await db.$transaction(async (tx) =&gt; {
+  await orders.create(tx, order)
+  await inventory.reserve(tx, items)   <i>both commit or neither does</i>
+})</pre>
+      <p>Split them across services and that guarantee is gone. You replace it with a saga: reserve first, create the order, and if the order fails, issue a compensating action that releases the reservation. That is real work, and it is the true price of the split.</p>
+    </div>
+  </div>
+
+  <div class="recap"><h4>Jargon used in this section</h4><dl>
+    <dt>modular monolith</dt><dd>One deployable process containing modules with enforced boundaries and their own data.</dd>
+    <dt>deployable artifact</dt><dd>The single built thing you ship: a container image, a jar, a zip. Counting these is how you count deploy units.</dd>
+    <dt>module boundary</dt><dd>The rule that code outside a module may only use its public entry point, checked by CI rather than trusted.</dd>
+    <dt>idempotency key</dt><dd>A unique ID sent with a request so that retrying it does not perform the action twice.</dd>
+    <dt>saga</dt><dd>A sequence of local steps with compensating undo actions, used to replace a transaction once you no longer have one.</dd>
+    <dt>compensating action</dt><dd>The undo step in a saga: release the reservation, refund the charge.</dd>
+  </dl></div>
+</section>
+
+<section id="distributed" class="x2">
+  <div class="sechead"><span class="tag">Axis 2 · what you deploy</span></div>
+  <h2>Distributed architecture</h2>
+  <p class="sub">Not a separate option: the umbrella name for the whole right side of axis 2.</p>
+
+  <div class="wwh"><div class="wwh-h"><span class="wwh-n">Why</span><h3>Why anyone accepts the pain</h3></div>
+  <p>Distributed architecture is not a maturity level you graduate to. It is a trade: you accept an entire category of new failures in exchange for something specific. If you cannot name the something, do not trade.</p>
+  <p>The legitimate reasons, and there are only about five:</p>
+  <ul>
+    <li><strong>Divergent scaling</strong>: image processing needs 16 GB and a GPU, your API needs 512 MB. Scaling them together burns money.</li>
+    <li><strong>Divergent runtime</strong>: the ML piece is Python, the rest is Node.</li>
+    <li><strong>Team release independence</strong>: two teams whose deploy cadences genuinely conflict, after you already tried one pipeline and it failed.</li>
+    <li><strong>Isolation</strong>: a regulated or untrusted workload that must not share a process.</li>
+    <li><strong>Availability asymmetry</strong>: checkout must stay up while reporting is being redeployed.</li>
+  </ul>
+  <p>Notice what is missing: "it scales better", "it is cleaner", "it is what real companies do". A modular monolith scales horizontally perfectly well: you run more copies of the same container. Scaling and splitting are different things.</p></div>
+
+  <div class="wwh"><div class="wwh-h"><span class="wwh-n">What it does</span><h3>What the word actually covers</h3></div>
+  <p>A distributed architecture is any system whose parts run in separate processes and communicate over a network. Microservices are distributed. Runtime micro-frontends are distributed. A Kafka-based event system is distributed. A modular monolith is not, no matter how many modules it has.</p>
+  <p>The moment a call crosses a process boundary, it stops being a function call and becomes a message that may vanish.</p></div>
+
+  <figure class="dg">
+  <svg viewBox="0 0 700 300" role="img" aria-label="In-process call compared with a network call">
+    <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="var(--dim2)" stroke-width="1.6"/></marker></defs>
+    <text class="sv-s" x="20" y="14">IN ONE PROCESS</text>
+    <rect class="sv-box" x="20" y="30" width="280" height="42" rx="7"/><text class="sv-t" x="160" y="56" text-anchor="middle">Order module</text>
+    <line class="sv-l" x1="160" y1="72" x2="160" y2="94" marker-end="url(#ah)"/>
+    <rect class="sv-box" style="stroke:var(--a3)" x="20" y="98" width="280" height="42" rx="7"/><text class="sv-t" x="160" y="124" text-anchor="middle">direct function call</text>
+    <line class="sv-l" x1="160" y1="140" x2="160" y2="162" marker-end="url(#ah)"/>
+    <rect class="sv-box" x="20" y="166" width="280" height="42" rx="7"/><text class="sv-t" x="160" y="192" text-anchor="middle">Payment module</text>
+    <text class="sv-s" x="160" y="232" text-anchor="middle">one failure mode: it throws.</text>
+    <text class="sv-s" x="160" y="250" text-anchor="middle">same memory, same clock.</text>
+
+    <text class="sv-s" x="400" y="14">ACROSS THE NETWORK</text>
+    <rect class="sv-box" x="400" y="30" width="280" height="42" rx="7"/><text class="sv-t" x="540" y="56" text-anchor="middle">Order service</text>
+    <line class="sv-l" x1="540" y1="72" x2="540" y2="94" marker-end="url(#ah)"/>
+    <rect class="sv-box" style="stroke:var(--warn)" x="400" y="98" width="280" height="42" rx="7"/><text class="sv-t" x="540" y="124" text-anchor="middle">call over a network</text>
+    <line class="sv-l" x1="540" y1="140" x2="540" y2="162" marker-end="url(#ah)"/>
+    <rect class="sv-box" x="400" y="166" width="280" height="42" rx="7"/><text class="sv-t" x="540" y="192" text-anchor="middle">Payment service</text>
+    <text class="sv-s" x="540" y="232" text-anchor="middle">timeouts, retries, partial writes,</text>
+    <text class="sv-s" x="540" y="250" text-anchor="middle">version skew, network splits.</text>
+  </svg>
+  <figcaption>Only the middle box changed. That is the entire difference between a monolith and a distributed system.</figcaption>
+  </figure>
+
+  <div class="eli"><button class="eli-t">Explain like I'm five <span class="chev">›</span></button><div class="eli-b">
+    <p>You want a cookie. Your sister is in the same room. You ask her, she hands you a cookie, or she says no. Two outcomes. Easy.</p>
+    <p>Now your sister is at her friend's house and you send her a letter asking for a cookie. You wait. Nothing comes back.</p>
+    <p>Did the letter get lost? Did she get it and the cookie is still in the post? Did she never read it? <strong>You cannot tell.</strong> And if you send a second letter, you might end up with two cookies, which sounds good until it is two charges on someone's credit card.</p>
+    <p>That "I do not know what happened" feeling is the whole difficulty of distributed systems. Everything hard about them (retries, timeouts, undo steps) exists to deal with that one feeling.</p>
+  </div></div>
+
+  <div class="lv" data-lv>
+    <div class="lv-bar" role="tablist">
+      <button role="tab" aria-selected="true">Basic</button>
+      <button role="tab" aria-selected="false">Intermediate</button>
+      <button role="tab" aria-selected="false">Advanced</button>
+    </div>
+    <div class="lv-pane on" role="tabpanel">
+      <p class="lvl-note">Level 1: count your deploy units.</p>
+      <p>Ask one question: <em>I fixed a bug in checkout. What must I redeploy, and what keeps running untouched?</em></p>
+<pre><b>Modular monolith</b>
+  rebuild 1 image → redeploy → <i>everything restarts together</i>
+  deploy units: <em>1</em>   → not distributed
+
+<b>Microservices</b>
+  rebuild checkout-service → redeploy it alone
+  orders-service <i>never restarts and does not notice</i>
+  deploy units: <em>many</em> → distributed</pre>
+      <p>Same code split, wildly different operational reality. The word "distributed" just means the second picture.</p>
+    </div>
+    <div class="lv-pane" role="tabpanel">
+      <p class="lvl-note">Level 2: the timeout that has no answer.</p>
+      <p>Here is the failure that does not exist in a monolith:</p>
+<pre>try {
+  await paymentService.charge(orderId, amount)   <i>HTTP call</i>
+} catch (e) {
+  <s>// e.code === 'ETIMEDOUT'</s>
+  <s>// Did the customer get charged? UNKNOWABLE from here.</s>
+}</pre>
+      <p>You cannot fix this by retrying blindly, because a retry might charge twice. You fix it by making the operation idempotent: the caller sends a key, the callee remembers it:</p>
+<pre><i>// caller: same key on every retry of the same logical charge</i>
+await payments.charge({
+  <u>idempotencyKey: `order-${orderId}-charge`</u>,
+  amount
+})
+
+<i>// callee: seen this key? return the old result, do nothing new</i>
+const prior = await db.charges.findUnique({ where: { key } })
+<em>if (prior) return prior.result</em></pre>
+      <p>Every distributed system ends up building this. It is not optional, and it is pure overhead you did not need in-process.</p>
+    </div>
+    <div class="lv-pane" role="tabpanel">
+      <p class="lvl-note">Level 3: the tax bill in full.</p>
+      <p>Once you are distributed, these stop being nice-to-haves:</p>
+      <ul>
+        <li><strong>Correlation IDs and distributed tracing</strong>: a stack trace no longer spans the request. You need OpenTelemetry to reassemble one user action from five services' logs.</li>
+        <li><strong>Circuit breakers and timeouts everywhere</strong>: a slow dependency will otherwise exhaust your connection pool and take you down with it.</li>
+        <li><strong>Backpressure</strong>: a fast producer will drown a slow consumer unless something pushes back.</li>
+        <li><strong>Contract versioning</strong>: you cannot deploy both sides at once, so every change must be backward compatible for at least one release. Expand, migrate, contract.</li>
+        <li><strong>Eventual consistency</strong>: different services briefly disagree about the truth, and the UI has to be honest about that.</li>
+      </ul>
+      <p>The backward-compatible rollout is the one people underestimate. You cannot rename a field:</p>
+<pre><i>// ✗ deploys are not simultaneous: this breaks in the gap</i>
+<s>- { total: number }</s>
+<s>+ { totalAmount: number }</s>
+
+<i>// ✓ expand → migrate → contract, over three releases</i>
+release 1: <em>{ total: number, totalAmount: number }</em>  <i>write both</i>
+release 2: <i>all consumers read totalAmount</i>
+release 3: <em>{ totalAmount: number }</em>                 <i>drop the old field</i></pre>
+      <p>And the deepest one: you cannot have consistency, availability and partition tolerance all at once. Partitions happen whether you like it or not, so every distributed design is really choosing between staying consistent and staying available when the network splits. In a monolith that question never arises.</p>
+    </div>
+  </div>
+
+  <div class="recap"><h4>Jargon used in this section</h4><dl>
+    <dt>distributed architecture</dt><dd>Any system whose parts run in separate processes talking over a network. The umbrella term.</dd>
+    <dt>microservices</dt><dd>The backend form of distributed architecture: many small independently deployed services.</dd>
+    <dt>eventual consistency</dt><dd>Parts of the system are briefly out of sync and converge later, rather than all agreeing instantly.</dd>
+    <dt>circuit breaker</dt><dd>A wrapper that stops calling a failing dependency for a while, so its failure does not exhaust your resources.</dd>
+    <dt>backpressure</dt><dd>A signal from a slow consumer telling the producer to slow down instead of dropping work.</dd>
+    <dt>distributed tracing</dt><dd>Tagging a request with an ID that travels across services so you can reconstruct one user action from many logs.</dd>
+    <dt>blast radius</dt><dd>How much of the system a single failure or deploy can damage.</dd>
+  </dl></div>
+
+  <div class="note"><span class="lbl">Common mix-up</span><p>Distributed is about process boundaries, not about code organisation. You can have a beautifully modular monolith that is not distributed, and a hideous ball of mud spread across forty services that is. Splitting does not clean anything up: it just adds a network between your existing mess.</p></div>
+</section>
+<section id="mfe-build" class="x2">
+  <div class="sechead"><span class="tag">Axis 2 · what you deploy</span></div>
+  <h2>Build-time micro-frontends</h2>
+  <p class="sub">Code ownership without deploy independence. Usually the right answer.</p>
+
+  <div class="wwh"><div class="wwh-h"><span class="wwh-n">Why</span><h3>Why split a frontend at all</h3></div>
+  <p>Because several teams working in one React app step on each other: shared routing, shared state, merge conflicts in the same files, and a review queue where nobody knows who owns what. Splitting the frontend into owned pieces fixes the ownership problem.</p>
+  <p>The question is whether you also need each piece to <em>deploy</em> on its own. Build-time integration says no, and that "no" saves you an enormous amount of grief.</p></div>
+
+  <div class="wwh"><div class="wwh-h"><span class="wwh-n">What it does</span><h3>What actually happens</h3></div>
+  <p>Each so-called micro-frontend is a package in your workspace. The shell app imports them, and the bundler compiles everything into one output. The browser downloads a single application.</p>
+  <p>So the cart team owns their code, gets their own folder, their own reviews, their own tests. But when they fix a bug, someone must rebuild and redeploy the shell. <strong>They cannot ship without the shell shipping.</strong></p>
+  <p>Which is the honest description: this is a modular monolith written in React. That is not an insult: it is the correct default.</p></div>
+
+  <div class="wwh"><div class="wwh-h"><span class="wwh-n">How</span><h3>How it is wired</h3></div>
+  <p>Workspace packages, ordinary imports, one build. There is no special runtime machinery at all: that is precisely the point.</p></div>
+
+  <div class="eli"><button class="eli-t">Explain like I'm five <span class="chev">›</span></button><div class="eli-b">
+    <p>Your class is making one big poster for the science fair.</p>
+    <p>Each group draws their own piece on their own sheet of paper: the volcano group, the planets group, the dinosaur group. Everyone owns their sheet and nobody scribbles on anyone else's.</p>
+    <p>But at the end, the teacher <strong>glues all the sheets onto one big board</strong>, and that board goes to the fair.</p>
+    <p>So if the dinosaur group wants to fix a wonky tail after the board is already glued, the whole board has to come back and be re-glued. Everyone's work goes back on the wall together, every time.</p>
+    <p>That is build-time. Separate sheets, one board.</p>
+  </div></div>
+
+  <div class="lv" data-lv>
+    <div class="lv-bar" role="tablist">
+      <button role="tab" aria-selected="true">Basic</button>
+      <button role="tab" aria-selected="false">Intermediate</button>
+      <button role="tab" aria-selected="false">Advanced</button>
+    </div>
+    <div class="lv-pane on" role="tabpanel">
+      <p class="lvl-note">Level 1: what the browser downloads.</p>
+      <p>This is the fastest way to tell build-time from runtime. Open the network tab.</p>
+<pre>GET /assets/<b>main-a3f2b1.js</b>
+     <i>↑ shell + cart + search + checkout, all in one file</i>
+
+<i># one request. one file. one deploy produced it.</i></pre>
+      <p>And the code is completely ordinary:</p>
+<pre><i>// apps/shell/src/App.tsx</i>
+import { CartWidget } from <em>'@opsvo/cart'</em>
+import { SearchBar }  from <em>'@opsvo/search'</em>
+
+<i>// just imports. nothing clever happening.</i></pre>
+    </div>
+    <div class="lv-pane" role="tabpanel">
+      <p class="lvl-note">Level 2: ownership without a network, plus lazy loading.</p>
+      <p>You get real boundaries from CODEOWNERS and lint rules, exactly like the modular monolith on the backend:</p>
+<pre><i># .github/CODEOWNERS</i>
+/packages/cart/     @opsvo/team-cart
+/packages/search/   @opsvo/team-search
+/apps/shell/        @opsvo/team-platform</pre>
+      <p>People often confuse code splitting with micro-frontends. It is not the same thing. Lazy loading splits the <em>bundle</em>, but it is still one deploy:</p>
+<pre>const Checkout = React.lazy(() =&gt; import(<em>'@opsvo/checkout'</em>))
+
+<i>// browser now fetches:</i>
+GET /assets/main-a3f2b1.js
+GET /assets/<b>checkout-7d21c9.js</b>   <i>← separate FILE...</i>
+
+<i>// ...but produced by the SAME build, from the SAME deploy.</i>
+<i>// still one deploy unit. still not distributed.</i></pre>
+      <p>Deploy units are counted by "how many things can I ship separately", not by "how many files does the browser fetch".</p>
+    </div>
+    <div class="lv-pane" role="tabpanel">
+      <p class="lvl-note">Level 3: scaling this to many teams before reaching for runtime.</p>
+      <p>Most teams that think they need runtime micro-frontends actually need a better build-time setup. Three techniques buy you a long runway:</p>
+      <ul>
+        <li><strong>Affected builds</strong>: CI only rebuilds and retests the packages a change touched, so a shared deploy is still fast.</li>
+        <li><strong>Contract-tested boundaries</strong>: each package exports a typed public API, and a type test fails CI if it changes incompatibly.</li>
+        <li><strong>Trunk-based deploys with feature flags</strong>: teams merge continuously and control their own release timing by flag, not by deploy. This is the key move: it gives you release independence without deploy independence.</li>
+      </ul>
+      <p>That last one deserves the code, because it solves the actual problem people buy Module Federation for:</p>
+<pre><i>// the cart team ships code every day, dark, behind a flag</i>
+export function CartWidget() {
+  const flags = useFlags()
+  return flags.<u>cartRedesign</u>
+    ? <em>&lt;CartV2 /&gt;</em>
+    : &lt;CartV1 /&gt;
+}
+
+<i>// release = flip a flag in the dashboard, no deploy at all.</i>
+<i>// rollback = flip it back, in seconds, not a revert + rebuild.</i></pre>
+      <p>Compare the rollback stories honestly. Flag flip: seconds, no build. Runtime micro-frontend rollback: republish the previous remote bundle and hope no other remote depended on the new one. Feature flags are strictly better for most teams, and cost a fraction as much.</p>
+    </div>
+  </div>
+
+  <div class="recap"><h4>Jargon used in this section</h4><dl>
+    <dt>build-time micro-frontends</dt><dd>Frontend packages composed into one application by the bundler. One deploy unit.</dd>
+    <dt>shell / host app</dt><dd>The application that owns routing and layout and hosts the other pieces.</dd>
+    <dt>bundler</dt><dd>The tool (Vite, webpack, esbuild) that compiles your source and dependencies into files the browser can load.</dd>
+    <dt>code splitting</dt><dd>Producing several bundle files from one build so the browser loads them on demand. Still one deploy unit.</dd>
+    <dt>feature flag</dt><dd>A runtime switch that turns a feature on or off without deploying, giving release independence cheaply.</dd>
+    <dt>trunk-based development</dt><dd>Everyone merges to main continuously, keeping unfinished work behind flags rather than in long branches.</dd>
+  </dl></div>
+</section>
+
+<section id="mfe-run" class="x2">
+  <div class="sechead"><span class="tag">Axis 2 · what you deploy</span></div>
+  <h2>Runtime micro-frontends</h2>
+  <p class="sub">The style. Module Federation is one tool that implements it.</p>
+
+  <div class="wwh"><div class="wwh-h"><span class="wwh-n">Why</span><h3>Why anyone does this</h3></div>
+  <p>One reason, and it is organisational rather than technical: you have several frontend teams that genuinely cannot share a release train. Team A must ship at 3pm Tuesday without waiting for Team B's failing test to be fixed.</p>
+  <p>That is it. There is no performance reason, no scalability reason, no cleanliness reason. If independent deploy is not the thing you desperately need, this is all cost.</p></div>
+
+  <div class="wwh"><div class="wwh-h"><span class="wwh-n">What it does</span><h3>What actually happens</h3></div>
+  <p>Each team builds and deploys its own bundle to its own URL. The shell fetches those bundles at runtime, in the browser, and stitches them into one running application. Nobody rebuilds anybody.</p>
+  <p>This is the same trade as microservices, moved to the client tier. The browser is now assembling a distributed system on every page load, from parts that were built at different times against possibly different dependency versions.</p></div>
+
+  <div class="wwh"><div class="wwh-h"><span class="wwh-n">How</span><h3>How the pieces find each other</h3></div>
+  <p>The shell is configured with the URLs of remote entry files. Each remote publishes a manifest of what it exposes and which dependencies it expects to share. At load time the runtime negotiates a single shared copy of React and friends, then dynamically imports the requested component.</p></div>
+  <p>Module Federation is the most common way to do this, but it is a bundler feature rather than the architecture itself. The same style can be built with browser-native <strong>import maps</strong>, with <strong>single-spa</strong> as an orchestrator, with <strong>web components</strong> as the composition boundary, or with plain <strong>iframes</strong> when hard isolation matters more than a seamless feel. Angular users will meet <strong>Native Federation</strong>, which is the same idea on web standards rather than webpack internals.</p>
+  <p>Worth separating those two things when you evaluate this. Deciding to adopt runtime micro-frontends is an architecture decision with the costs listed below. Deciding to use Module Federation rather than import maps is a tooling decision you can revisit far more cheaply.</p>
+
+  <div class="eli"><button class="eli-t">Explain like I'm five <span class="chev">›</span></button><div class="eli-b">
+    <p>Back to the science fair poster, but this time nobody glues anything.</p>
+    <p>Each group pins their own sheet to the board with their own pin. The dinosaur group can take their sheet down, fix the tail, and pin it back up whenever they want. Nobody else's sheet moves. That is the good part.</p>
+    <p>Here is the bad part. Everyone has to share <strong>one box of crayons</strong>. If the volcano group brings the new crayons and the planets group only knows how to use the old ones, someone's picture comes out wrong, and you only find out when people are already looking at the board.</p>
+    <p>Also, if one group forgets to pin their sheet back up, there is just a hole in the middle of the poster, and visitors see it.</p>
+    <p>Separate sheets, no glue, shared crayons, occasional holes.</p>
+  </div></div>
+
+  <div class="lv" data-lv>
+    <div class="lv-bar" role="tablist">
+      <button role="tab" aria-selected="true">Basic</button>
+      <button role="tab" aria-selected="false">Intermediate</button>
+      <button role="tab" aria-selected="false">Advanced</button>
+    </div>
+    <div class="lv-pane on" role="tabpanel">
+      <p class="lvl-note">Level 1: the network tab tells you immediately.</p>
+<pre>GET /assets/<b>shell-9c1d.js</b>       <i>← shell team's deploy</i>
+GET /cart/<b>remoteEntry.js</b>        <i>← cart team's deploy</i>
+GET /search/<b>remoteEntry.js</b>      <i>← search team's deploy</i>
+
+<i># three files from three separate deployments,</i>
+<i># assembled in the browser at load time.</i></pre>
+      <p>Compare with build-time, which was one file from one deployment. That difference is the entire concept.</p>
+    </div>
+    <div class="lv-pane" role="tabpanel">
+      <p class="lvl-note">Level 2: the configuration, and the line that matters most.</p>
+<pre><i>// cart/vite.config.ts, the REMOTE (producer)</i>
+federation({
+  name: 'cart',
+  filename: <b>'remoteEntry.js'</b>,
+  exposes: { <em>'./CartWidget': './src/CartWidget'</em> },
+  shared: { react: { <u>singleton: true, requiredVersion: '^18.2.0'</u> } }
+})
+
+<i>// shell/vite.config.ts, the HOST (consumer)</i>
+federation({
+  name: 'shell',
+  remotes: { cart: <b>'https://cdn.opsvo.in/cart/remoteEntry.js'</b> },
+  shared: { react: { <u>singleton: true</u> } }
+})</pre>
+      <p>Consuming it looks almost normal, except the import target does not exist on your disk:</p>
+<pre>const CartWidget = React.lazy(() =&gt; import(<b>'cart/CartWidget'</b>))
+<i>// resolved over HTTP at runtime, from someone else's deploy</i></pre>
+      <p><code>singleton: true</code> is the line that keeps you alive. Without it two copies of React load, hooks break in ways that make no sense, and context providers silently stop reaching their consumers.</p>
+    </div>
+    <div class="lv-pane" role="tabpanel">
+      <p class="lvl-note">Level 3: everything that will actually go wrong.</p>
+      <p><strong>1. Version skew is a runtime failure your CI cannot see.</strong> The remote was built against React 18.3; the shell negotiated 18.2. Nothing fails at build time on either side, because they were never built together.</p>
+<pre><i>// what you see in production, with no useful stack trace:</i>
+<s>Uncaught TypeError: Cannot read properties of null (reading 'useState')</s>
+<i>// meaning: two React copies. hooks resolved against the wrong one.</i></pre>
+      <p><strong>2. A broken remote takes down the shell</strong> unless you defend every mount point:</p>
+<pre>&lt;ErrorBoundary fallback={&lt;CartUnavailable /&gt;}&gt;
+  &lt;Suspense fallback={&lt;Skeleton /&gt;}&gt;
+    <em>&lt;CartWidget /&gt;</em>
+  &lt;/Suspense&gt;
+&lt;/ErrorBoundary&gt;
+
+<i>// without this, one 404 on remoteEntry.js = white screen.</i></pre>
+      <p><strong>3. Types do not cross the boundary for free.</strong> TypeScript cannot see into a URL, so you need generated declaration packages published by each remote, which reintroduces exactly the version coordination you were trying to escape.</p>
+      <p><strong>4. Everything else gets harder</strong>: end-to-end tests need every remote deployed somewhere; CSS leaks between independently built bundles unless scoped; tracing a bug means correlating three deploy histories; and the design system becomes a shared dependency that drifts per remote.</p>
+      <div class="note"><span class="lbl">The honest threshold</span><p>Below roughly four independent frontend teams, the cost exceeds the benefit. And before you reach for this, try feature flags on a build-time setup: they deliver release independence, which is what you actually wanted, at a fraction of the price.</p></div>
+    </div>
+  </div>
+
+  <div class="recap"><h4>Jargon used in this section</h4><dl>
+    <dt>runtime micro-frontends</dt><dd>Separately deployed frontend bundles fetched and combined in the browser at load time. Many deploy units: distributed.</dd>
+    <dt>Module Federation</dt><dd>The webpack and Vite mechanism that implements this: remotes expose modules, hosts import them over HTTP.</dd>
+    <dt>remote</dt><dd>A separately deployed bundle that exposes components for others to load.</dd>
+    <dt>remoteEntry.js</dt><dd>The manifest file a remote publishes, listing what it exposes and what it expects to share.</dd>
+    <dt>singleton (shared dependency)</dt><dd>A configuration forcing exactly one copy of a library like React across all bundles. Omitting it breaks hooks.</dd>
+    <dt>version skew</dt><dd>Independently deployed parts holding incompatible versions of a shared dependency: a runtime-only failure.</dd>
+    <dt>error boundary</dt><dd>A React component that catches a rendering failure below it, so one broken remote does not blank the page.</dd>
+  </dl></div>
+</section>
+<section id="hex" class="x3">
+  <div class="sechead"><span class="tag">Axis 3 · code inside a unit</span></div>
+  <h2>Hexagonal, Onion, Clean</h2>
+  <p class="sub">One idea, published three times, by three people, with three vocabularies.</p>
+
+  <div class="wwh"><div class="wwh-h"><span class="wwh-n">Why</span><h3>Why this pattern exists</h3></div>
+  <p>Because business rules outlive frameworks. Your rule "orders over ₹50,000 need manual approval" will be true in ten years. Prisma, Fastify and Stripe will not necessarily still be your choices. When the rule is welded to the tools, three things go wrong: you cannot test the rule without booting a database, you cannot swap a vendor without rewriting logic, and you cannot read the rules without wading through query code.</p></div>
+
+  <div class="wwh"><div class="wwh-h"><span class="wwh-n">What it does</span><h3>The single rule underneath all three names</h3></div>
+  <div class="key"><span class="lbl">Learn this sentence</span><p>Infrastructure imports the domain. The domain never imports infrastructure.</p></div>
+  <p>That is the entire content. The domain declares interfaces describing what it needs; infrastructure provides classes implementing them. Dependencies point inward, toward the business logic.</p>
+  <p>The three names differ only in packaging. <strong>Hexagonal</strong> (Cockburn, 2005) calls the interfaces <em>ports</em> and the implementations <em>adapters</em>, and draws driving adapters on one side and driven adapters on the other. <strong>Onion</strong> (Palermo, 2008) draws the same thing as concentric rings and adds an application-services ring. <strong>Clean</strong> (Martin, 2012) synthesises both and names the artifacts: entities, use cases, controllers, presenters.</p></div>
+  <div class="note"><span class="lbl">On capitalisation</span><p>Hexagonal, Clean and Onion Architecture are capitalised throughout this page because they are proper names, coined in specific articles by specific people. Event-driven, layered, pipeline and distributed stay lowercase because they describe a shape rather than name someone's work. If you ever wonder whether a term is a coined pattern or a plain description, that is the test: can you name the article?</p></div>
+
+  <div class="wwh"><div class="wwh-h"><span class="wwh-n">How</span><h3>How to check you have done it</h3></div>
+  <p>Do not argue about diagrams. Run this:</p>
+<pre>$ grep -r "prisma\|stripe\|fastify" src/domain/
+
+<em>(no results)</em>   ← you have it. whatever you call it.</pre></div>
+
+  <div class="eli"><button class="eli-t">Explain like I'm five <span class="chev">›</span></button><div class="eli-b">
+    <p>Think about a lamp and a wall socket.</p>
+    <p>The lamp does not care where electricity comes from. It just knows the shape of the plug. Solar panel, coal plant, a battery in the shed: the lamp works the same, because everyone agrees on the shape of the socket.</p>
+    <p>Your <strong>business rules are the lamp</strong>. The database and the payment company are the <strong>power stations</strong>. The <strong>plug shape is the interface</strong>: you write down "I need something that can save an order" without saying who does it.</p>
+    <p>Bad code glues the lamp directly to the coal plant. Then you can never test the lamp without firing up a coal plant, and you can never switch to solar.</p>
+    <p>Hexagonal, Onion and Clean are three people who each drew a picture of "use a plug, not glue". Same advice. Different drawings.</p>
+  </div></div>
+
+  <div class="lv" data-lv>
+    <div class="lv-bar" role="tablist">
+      <button role="tab" aria-selected="true">Basic</button>
+      <button role="tab" aria-selected="false">Intermediate</button>
+      <button role="tab" aria-selected="false">Advanced</button>
+    </div>
+    <div class="lv-pane on" role="tabpanel">
+      <p class="lvl-note">Level 1: the before and after.</p>
+      <p><strong>Before</strong>: business rules welded to tools:</p>
+<pre><i>// order.ts</i>
+<s>import { prisma } from '../db'</s>
+<s>import Stripe from 'stripe'</s>
+
+export async function placeOrder(userId, items) {
+  const order = await <s>prisma.order.create</s>({ data: {...} })
+  await <s>new Stripe(KEY).charges.create</s>({ amount: order.total })
+}</pre>
+      <p>To test "orders over ₹50,000 need approval" you must boot Postgres and mock the Stripe SDK. To switch to Razorpay you edit order logic.</p>
+      <p><strong>After</strong>: the domain states what it needs:</p>
+<pre><i>// domain/ports.ts, the plug shapes</i>
+export interface <em>OrderRepository</em> { save(o: Order): Promise&lt;void&gt; }
+export interface <em>PaymentGateway</em>  { charge(a: Money): Promise&lt;Receipt&gt; }
+
+<i>// domain/place-order.ts, imports NOTHING from prisma/stripe</i>
+export async function placeOrder(
+  deps: { orders: <em>OrderRepository</em>, payments: <em>PaymentGateway</em> },
+  cmd: PlaceOrderCommand
+) { <i>/* pure business rules */</i> }
+
+<i>// infrastructure/prisma-order-repository.ts</i>
+import { OrderRepository } from <u>'../domain/ports'</u>   <i>← arrow points INWARD</i>
+export class PrismaOrderRepository implements OrderRepository { ... }</pre>
+    </div>
+    <div class="lv-pane" role="tabpanel">
+      <p class="lvl-note">Level 2: why the tests get dramatically better.</p>
+      <p>This is the payoff you feel daily. The business rule test needs no database, no network, no mocking library:</p>
+<pre><i>// a fake that is 4 lines, not a mock framework</i>
+class InMemoryOrders implements OrderRepository {
+  saved: Order[] = []
+  async save(o: Order) { this.saved.push(o) }
+}
+
+test('orders over 50k need approval', async () =&gt; {
+  const orders = new InMemoryOrders()
+  await placeOrder({ orders, payments: new FakePayments() }, bigOrder)
+  <em>expect(orders.saved[0].status).toBe('PENDING_APPROVAL')</em>
+})
+
+<i>// runs in 3ms. no docker. no test database. no flakiness.</i></pre>
+      <p>Then wiring, which is where the real implementations get plugged in, in one place at startup:</p>
+<pre><i>// wiring/container.ts, the only file that knows about BOTH sides</i>
+export const deps = {
+  orders:   <b>new PrismaOrderRepository(prisma)</b>,
+  payments: <b>new RazorpayGateway(process.env.RAZORPAY_KEY)</b>
+}</pre>
+      <p>Swapping Stripe for Razorpay is now a one-line change in one file, because no domain code ever mentioned either.</p>
+      <p>The vocabulary map, so you can read any of the three literatures:</p>
+      <div class="tw"><table>
+        <thead><tr><th>Concept</th><th>Hexagonal</th><th>Onion</th><th>Clean</th></tr></thead>
+        <tbody>
+        <tr><td><strong>Business rules</strong></td><td>the core</td><td>domain model</td><td>entities</td></tr>
+        <tr><td><strong>Orchestration</strong></td><td>(unnamed)</td><td>application services</td><td>use cases / interactors</td></tr>
+        <tr><td><strong>The interface</strong></td><td>port</td><td>(interface)</td><td>boundary / gateway</td></tr>
+        <tr><td><strong>The implementation</strong></td><td>adapter</td><td>infrastructure</td><td>interface adapters</td></tr>
+        <tr><td><strong>The rule</strong></td><td>point inward</td><td>point inward</td><td>the Dependency Rule</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+    <div class="lv-pane" role="tabpanel">
+      <p class="lvl-note">Level 3: the mistakes that look like the pattern but are not.</p>
+      <p><strong>Leaking the ORM through the port.</strong> The most common failure. This looks hexagonal and is not:</p>
+<pre><i>// ✗ the "domain" now depends on Prisma's generated types</i>
+<s>import type { Order } from '@prisma/client'</s>
+export interface OrderRepository { save(o: <s>Order</s>): Promise&lt;void&gt; }
+
+<i>// ✓ the domain owns its own type; infrastructure maps to it</i>
+<em>export class Order { constructor(readonly id: OrderId, ...) {} }</em>
+export interface OrderRepository { save(o: <em>Order</em>): Promise&lt;void&gt; }</pre>
+      <p>If your grep for <code>prisma</code> in <code>src/domain/</code> hits a type import, you have not done it.</p>
+      <p><strong>Anemic domain.</strong> If your entities are bare data bags and every rule lives in a service, you have layered architecture with extra folders, not hexagonal. Rules belong on the objects that own the data.</p>
+      <p><strong>Ports defined by the provider, not the need.</strong> A port named <code>StripePort</code> with methods mirroring Stripe's API is an adapter wearing an interface. The domain should declare <code>PaymentGateway.charge(Money)</code> because that is what the business needs: the shape comes from the inside, not the vendor.</p>
+      <p><strong>Enforce it mechanically</strong>, or it decays within two sprints:</p>
+<pre><i>// .dependency-cruiser.js</i>
+{
+  name: <b>'domain-stays-pure'</b>,
+  severity: 'error',
+  from: { path: '^src/domain' },
+  to:   { path: <u>'node_modules|^src/infrastructure|^src/http'</u> }
+}</pre>
+      <p>And the payoff that connects back to axis 2: a module whose domain imports nothing can be lifted into its own service by writing one new adapter. A module welded to the framework is a rewrite. <strong>Hexagonal architecture is what buys you the option to go distributed without forcing you to.</strong></p>
+    </div>
+  </div>
+
+  <div class="recap"><h4>Jargon used in this section</h4><dl>
+    <dt>port</dt><dd>An interface the domain declares, describing something it needs. Named for the need, not the vendor.</dd>
+    <dt>adapter</dt><dd>A class in infrastructure that implements a port using a real tool: Prisma, Stripe, S3.</dd>
+    <dt>dependency inversion</dt><dd>High-level code depends on an interface it owns; low-level code implements it. This is what makes the arrows point inward.</dd>
+    <dt>domain</dt><dd>The code expressing business rules, free of frameworks and storage concerns.</dd>
+    <dt>infrastructure</dt><dd>The code that talks to the outside world: databases, HTTP, queues, third-party APIs.</dd>
+    <dt>use case / interactor</dt><dd>Clean Architecture's name for one application operation, orchestrating entities through ports.</dd>
+    <dt>anemic domain model</dt><dd>Entities reduced to data with no behaviour, with all rules pushed into services. A common false positive.</dd>
+    <dt>composition root</dt><dd>The single startup file where real adapters are constructed and injected. The only place both sides meet.</dd>
+  </dl></div>
+</section>
+
+<section id="layered" class="x3">
+  <div class="sechead"><span class="tag">Axis 3 · code inside a unit</span></div>
+  <h2>Layered, multi-tier and GUI architectures</h2>
+  <p class="sub">The oldest answer on axis 3, plus its frontend cousins.</p>
+
+  <div class="wwh"><div class="wwh-h"><span class="wwh-n">Why</span><h3>Why group code by technical role</h3></div>
+  <p>Because it is the obvious first move and it works for a long time. Put the HTTP handling together, put the business logic together, put the database code together. Anyone joining the codebase knows where to look.</p>
+  <p>The reason hexagonal exists is that layered tends to leak: the business layer imports the persistence layer's entities, and now your domain knows about your ORM after all.</p></div>
+
+  <div class="wwh"><div class="wwh-h"><span class="wwh-n">What it does</span><h3>Layer versus tier: the distinction worth having</h3></div>
+  <p>A <strong>layer</strong> is logical: a folder, a package, a namespace. A <strong>tier</strong> is physical: a separate machine or process. Classic three-tier is browser, application server, database: three tiers. Your backend might have four layers inside the middle tier.</p>
+  <p>Layered says "group by <em>what kind</em> of code this is". Hexagonal says "group by <em>what the business does</em>, and push technical concerns to the edge". Same axis, competing opinions.</p></div>
+
+  <div class="wwh"><div class="wwh-h"><span class="wwh-n">How</span><h3>GUI architectures are the same question for UI code</h3></div>
+  <p>Every GUI pattern solves one problem: separating <em>what is on screen</em> from <em>what is true</em>.</p>
+  <ul>
+    <li><strong>MVC</strong>: controller takes input, updates the model, view renders it.</li>
+    <li><strong>MVP</strong>: a presenter mediates everything and the view is passive and dumb, which makes it testable.</li>
+    <li><strong>MVVM</strong>: the view binds declaratively to a view-model and the framework syncs them. WPF, Android, Vue.</li>
+    <li><strong>Flux / Redux / MVU</strong>: strictly one direction. Action → reducer → new state → re-render. The React world.</li>
+  </ul></div>
+
+  <div class="eli"><button class="eli-t">Explain like I'm five <span class="chev">›</span></button><div class="eli-b">
+    <p><strong>Layers</strong> are like a sandwich. Bread, filling, bread. Each layer only touches the one below it. You do not reach through the bread to grab the filling from underneath.</p>
+    <p><strong>Tiers</strong> are different: that is whether the sandwich is all on one plate, or the bread is on your plate and the filling is on a plate in the next room. Layers are about arrangement. Tiers are about how many plates.</p>
+    <p>Now the <strong>GUI part</strong>. Imagine a puppet show. The puppet is what people see. Somewhere backstage there is a list of what is really happening: who is angry, who has the treasure.</p>
+    <p>All those scary names (MVC, MVP, MVVM, Redux) are just different rules about who is allowed to move the puppet, and how the puppet finds out what changed backstage. That is honestly all they are.</p>
+  </div></div>
+
+  <div class="lv" data-lv>
+    <div class="lv-bar" role="tablist">
+      <button role="tab" aria-selected="true">Basic</button>
+      <button role="tab" aria-selected="false">Intermediate</button>
+      <button role="tab" aria-selected="false">Advanced</button>
+    </div>
+    <div class="lv-pane on" role="tabpanel">
+      <p class="lvl-note">Level 1: the shape you have probably already written.</p>
+<pre>src/
+  <b>controllers/</b>    <i>HTTP in, HTTP out</i>
+  <b>services/</b>       <i>business logic</i>
+  <b>repositories/</b>   <i>database access</i>
+  <b>models/</b>         <i>data shapes</i>
+
+<i>// the rule: each layer calls only downward.</i>
+controller → service → repository → database</pre>
+      <p>And the three tiers your web app already is:</p>
+<pre>[ browser ]  ←HTTP→  [ app server ]  ←SQL→  [ database ]
+   tier 1              tier 2                 tier 3</pre>
+      <p>Layers live <em>inside</em> tier 2. Two different words, two different scales.</p>
+    </div>
+    <div class="lv-pane" role="tabpanel">
+      <p class="lvl-note">Level 2: the leak, and Redux as one concrete GUI pattern.</p>
+      <p>Here is how layered quietly turns into a mess:</p>
+<pre><i>// services/order-service.ts, the "business" layer</i>
+<s>import type { Order } from '@prisma/client'</s>   <i>← the leak</i>
+
+export async function approve(order: <s>Order</s>) { ... }
+
+<i>// business logic now depends on the database schema.</i>
+<i>// rename a column → business layer changes. this is what</i>
+<i>// hexagonal was invented to stop.</i></pre>
+      <p>On the UI side, the unidirectional pattern is the one you will actually meet:</p>
+<pre><i>// 1. something happens → an ACTION describes it</i>
+dispatch({ type: <em>'cart/itemAdded'</em>, payload: { sku, qty } })
+
+<i>// 2. a REDUCER computes the new truth. pure function.</i>
+function cart(state, action) {
+  if (action.type === 'cart/itemAdded')
+    return { ...state, items: [...state.items, action.payload] }
+  return state
+}
+
+<i>// 3. the VIEW re-renders from the new truth</i>
+<i>// data flows ONE way. the view never mutates state directly.</i></pre>
+      <p>Notice that reducer is a pure business rule with no framework in it: the same instinct as hexagonal, arrived at from the UI side.</p>
+    </div>
+    <div class="lv-pane" role="tabpanel">
+      <p class="lvl-note">Level 3: choosing between the GUI patterns, and how tiers stack.</p>
+      <div class="tw"><table>
+        <thead><tr><th>Pattern</th><th>Who updates the view</th><th>Best when</th></tr></thead>
+        <tbody>
+        <tr><td><strong>MVC</strong></td><td>View observes the model</td><td>Server-rendered apps; simple flows</td></tr>
+        <tr><td><strong>MVP</strong></td><td>Presenter pushes to a passive view</td><td>You need the view fully unit-testable</td></tr>
+        <tr><td><strong>MVVM</strong></td><td>Framework data-binding syncs both</td><td>The framework provides binding: WPF, Vue, Android</td></tr>
+        <tr><td><strong>Flux / MVU</strong></td><td>State change re-renders everything</td><td>Complex shared state; you want time-travel debugging</td></tr>
+        </tbody>
+      </table></div>
+      <p>The useful realisation: a full system runs several axis-3 answers at once, one per tier, and that is completely normal.</p>
+<pre><b>tier 1: browser</b>
+   Flux/MVU inside          (actions → reducers → render)
+
+<b>tier 2: application server</b>
+   Hexagonal inside         (ports, adapters, pure domain)
+   <i>+ a BFF layer shaping responses for this specific UI</i>
+
+<b>tier 3: database</b>
+   schema per module        (from the modular monolith rules)</pre>
+      <p>One more thing worth knowing, because it explains a lot of real systems: the <strong>BFF</strong> (backend for frontend) is a thin tier-2 layer that exists purely to shape data for one client. Mobile and web get different BFFs over the same domain, so neither client has to make six round trips or receive fields it will not use.</p>
+      <p>Finally, the honest verdict on layered versus hexagonal: layered is easier to teach and fine for CRUD. The moment your business rules become interesting, the leak in the middle layer starts costing you, and that is your signal to invert the dependency.</p>
+    </div>
+  </div>
+
+  <div class="recap"><h4>Jargon used in this section</h4><dl>
+    <dt>layer</dt><dd>A logical grouping of code by technical role: controllers, services, repositories. A folder.</dd>
+    <dt>tier</dt><dd>A physical deployment boundary: browser, app server, database. A machine or process.</dd>
+    <dt>MVC / MVP / MVVM</dt><dd>GUI patterns differing in who updates the view and how it learns about state changes.</dd>
+    <dt>Flux / MVU / Redux</dt><dd>Strictly unidirectional UI flow: action → reducer → new state → re-render.</dd>
+    <dt>reducer</dt><dd>A pure function taking current state and an action and returning the next state.</dd>
+    <dt>BFF (backend for frontend)</dt><dd>A thin server layer shaping data for one specific client, so mobile and web can differ without changing the domain.</dd>
+    <dt>CRUD</dt><dd>Create, read, update, delete: applications that are mostly forms over a database, with few real rules.</dd>
+  </dl></div>
+</section>
+<section id="events" class="x3">
+  <div class="sechead"><span class="tag">Axis 3 · code inside a unit</span></div>
+  <h2>Event-driven</h2>
+  <p class="sub">Announce what happened. Let others decide whether they care.</p>
+
+  <div class="wwh"><div class="wwh-h"><span class="wwh-n">Why</span><h3>Why stop calling things directly</h3></div>
+  <p>Because the caller accumulates dependencies. Placing an order needs to reserve stock, send a confirmation email, update analytics, notify the warehouse, award loyalty points. Call each one directly and the order module now imports five modules and must be edited every time a sixth thing wants to react.</p>
+  <p>Invert it: the order module announces that an order was placed, and anything that cares subscribes. Adding a sixth reaction touches zero existing code.</p></div>
+
+  <div class="wwh"><div class="wwh-h"><span class="wwh-n">What it does</span><h3>The trade you are making</h3></div>
+  <p>You gain extensibility, natural buffering, and resilience to a slow consumer. You lose the ability to read the flow. There is no single file that tells you everything that happens when an order is placed: you have to go find the subscribers.</p>
+  <div class="key"><span class="lbl">Critical point</span><p>Event-driven is <strong>not</strong> the same as distributed. The bus can be an in-memory emitter inside your monolith, or it can be Kafka. Same pattern, wildly different operational cost. In-process domain events give you most of the decoupling benefit for almost none of the price.</p></div></div>
+
+  <div class="wwh"><div class="wwh-h"><span class="wwh-n">How</span><h3>How the coupling shapes differ</h3></div>
+  <p>Compare three ways the same work gets triggered. Only the wiring changes:</p></div>
+
+  <figure class="dg">
+  <svg viewBox="0 0 700 350" role="img" aria-label="Direct calls, event-driven and pipeline coupling shapes compared">
+    <defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M1 1L9 5L1 9" fill="none" stroke="var(--dim2)" stroke-width="1.6"/></marker></defs>
+    <text class="sv-s" x="20" y="14">DIRECT CALLS: producer knows every consumer</text>
+    <rect class="sv-box" style="stroke:var(--a3)" x="20" y="44" width="160" height="40" rx="7"/><text class="sv-t" x="100" y="69" text-anchor="middle">Order module</text>
+    <rect class="sv-box" x="440" y="20" width="180" height="38" rx="7"/><text class="sv-t" x="530" y="44" text-anchor="middle">Inventory</text>
+    <rect class="sv-box" x="440" y="70" width="180" height="38" rx="7"/><text class="sv-t" x="530" y="94" text-anchor="middle">Email</text>
+    <line class="sv-l" x1="180" y1="64" x2="436" y2="41" marker-end="url(#ah2)"/>
+    <line class="sv-l" x1="180" y1="64" x2="436" y2="87" marker-end="url(#ah2)"/>
+
+    <text class="sv-s" x="20" y="140">EVENT-DRIVEN: producer knows nobody</text>
+    <rect class="sv-box" style="stroke:var(--a3)" x="20" y="174" width="160" height="40" rx="7"/><text class="sv-t" x="100" y="199" text-anchor="middle">Order module</text>
+    <rect class="sv-box" style="stroke:var(--a2)" x="220" y="174" width="160" height="40" rx="7"/><text class="sv-t" x="300" y="199" text-anchor="middle">Event bus</text>
+    <rect class="sv-box" x="440" y="150" width="180" height="38" rx="7"/><text class="sv-t" x="530" y="174" text-anchor="middle">Inventory</text>
+    <rect class="sv-box" x="440" y="200" width="180" height="38" rx="7"/><text class="sv-t" x="530" y="224" text-anchor="middle">Email</text>
+    <line class="sv-l" x1="180" y1="194" x2="216" y2="194" marker-end="url(#ah2)"/>
+    <line class="sv-l" x1="380" y1="194" x2="436" y2="171" marker-end="url(#ah2)"/>
+    <line class="sv-l" x1="380" y1="194" x2="436" y2="217" marker-end="url(#ah2)"/>
+
+    <text class="sv-s" x="20" y="270">PIPELINE: each stage knows only the next</text>
+    <rect class="sv-box" style="stroke:var(--a1)" x="20" y="290" width="150" height="42" rx="7"/><text class="sv-t" x="95" y="316" text-anchor="middle">Fetch</text>
+    <rect class="sv-box" style="stroke:var(--a1)" x="190" y="290" width="150" height="42" rx="7"/><text class="sv-t" x="265" y="316" text-anchor="middle">Parse</text>
+    <rect class="sv-box" style="stroke:var(--a1)" x="360" y="290" width="150" height="42" rx="7"/><text class="sv-t" x="435" y="316" text-anchor="middle">Enrich</text>
+    <rect class="sv-box" style="stroke:var(--a1)" x="530" y="290" width="150" height="42" rx="7"/><text class="sv-t" x="605" y="316" text-anchor="middle">Store</text>
+    <line class="sv-l" x1="170" y1="311" x2="186" y2="311" marker-end="url(#ah2)"/>
+    <line class="sv-l" x1="340" y1="311" x2="356" y2="311" marker-end="url(#ah2)"/>
+    <line class="sv-l" x1="510" y1="311" x2="526" y2="311" marker-end="url(#ah2)"/>
+  </svg>
+  <figcaption>None of these three is distributed as drawn. Every arrow could be an ordinary function call. Turn one arrow into a network hop and <em>then</em> you have a distributed system.</figcaption>
+  </figure>
+
+  <div class="eli"><button class="eli-t">Explain like I'm five <span class="chev">›</span></button><div class="eli-b">
+    <p>Two ways to tell people dinner is ready.</p>
+    <p><strong>Direct calls:</strong> you walk to each person's room and tell them individually. You have to know exactly who lives in the house. When a new cousin moves in, you have to remember to add them to your walking route, or they never eat.</p>
+    <p><strong>Event-driven:</strong> you ring a bell in the hallway and shout "DINNER". You do not know or care who is home. Anyone who wants dinner comes. A new cousin just needs to know that the bell means dinner: you change nothing.</p>
+    <p>The catch: after ringing the bell, <em>you do not know if anyone heard you.</em> With the walking route you at least saw each person's face. That uncertainty is the price of the bell.</p>
+  </div></div>
+
+  <div class="lv" data-lv>
+    <div class="lv-bar" role="tablist">
+      <button role="tab" aria-selected="true">Basic</button>
+      <button role="tab" aria-selected="false">Intermediate</button>
+      <button role="tab" aria-selected="false">Advanced</button>
+    </div>
+    <div class="lv-pane on" role="tabpanel">
+      <p class="lvl-note">Level 1: the two versions side by side.</p>
+<pre><i>// DIRECT: order module now depends on three modules</i>
+<s>await inventory.reserve(items)</s>
+<s>await email.sendConfirmation(order)</s>
+<s>await analytics.track(order)</s>
+
+<i>// EVENT-DRIVEN: order module depends on nothing</i>
+<em>await bus.publish(new OrderPlaced(order))</em></pre>
+      <p>And the listeners live wherever they belong:</p>
+<pre><i>// inventory/subscribers.ts</i>
+bus.on(<em>'OrderPlaced'</em>, e =&gt; reserve(e.items))
+
+<i>// email/subscribers.ts</i>
+bus.on(<em>'OrderPlaced'</em>, e =&gt; sendConfirmation(e.orderId))</pre>
+      <p>Want loyalty points too? Add a new file. The order module is never opened.</p>
+    </div>
+    <div class="lv-pane" role="tabpanel">
+      <p class="lvl-note">Level 2: in-process events, which is where you should start.</p>
+      <p>You do not need Kafka to be event-driven. This is a complete, useful implementation:</p>
+<pre><i>// shared/bus.ts, the entire "infrastructure"</i>
+type Handler = (e: any) =&gt; Promise&lt;void&gt;
+const handlers = new Map&lt;string, Handler[]&gt;()
+
+export const bus = {
+  on(type: string, h: Handler) {
+    handlers.set(type, [...(handlers.get(type) ?? []), h])
+  },
+  async publish(e: { type: string }) {
+    for (const h of handlers.get(e.type) ?? []) <em>await h(e)</em>
+  }
+}</pre>
+      <p>Now the important design decision: should the event be part of the caller's transaction?</p>
+<pre><i>// SYNCHRONOUS in-process: subscribers run inside the same</i>
+<i>// transaction. if email fails, the ORDER rolls back. usually wrong.</i>
+
+<i>// better: commit first, then publish</i>
+await db.$transaction(tx =&gt; orders.save(tx, order))
+<em>await bus.publish(new OrderPlaced(order))</em>   <i>← after commit</i></pre>
+      <p>Event names matter more than people expect. Name them as facts in the past tense: <code>OrderPlaced</code>, <code>PaymentCaptured</code>. If you find yourself writing <code>SendEmailCommand</code>, that is a command, not an event, and it belongs as a direct call.</p>
+    </div>
+    <div class="lv-pane" role="tabpanel">
+      <p class="lvl-note">Level 3: what changes when the bus becomes a real broker.</p>
+      <p>Swap the in-memory bus for Kafka or SNS and you have crossed onto axis 2: you are now distributed, with every cost from that section. Three problems appear immediately.</p>
+      <p><strong>1. The dual-write problem.</strong> This code is broken and it looks fine:</p>
+<pre>await db.orders.save(order)          <i>✓ committed</i>
+<s>await kafka.publish(orderPlaced)</s>    <i>✗ process dies here</i>
+
+<i>// order exists. nobody was ever told. permanently inconsistent.</i></pre>
+      <p>The fix is the <strong>transactional outbox</strong>: write the event into your own database in the same transaction, and let a separate process publish it.</p>
+<pre>await db.$transaction(async tx =&gt; {
+  await tx.orders.create({ data: order })
+  <em>await tx.outbox.create({ data: { type: 'OrderPlaced', payload } })</em>
+})
+<i>// both commit or neither. a relay polls outbox → publishes → marks sent.</i></pre>
+      <p><strong>2. Delivery is at-least-once, so handlers must be idempotent.</strong> Your email subscriber will eventually receive the same event twice. Deduplicate on event ID.</p>
+      <p><strong>3. Choreography drifts.</strong> With enough events reacting to events, no one can answer "what happens when an order is placed" without reading the whole system. The counterweight is <strong>orchestration</strong>: a single explicit workflow that calls steps in order and owns the compensations. Rule of thumb: choreography for notifications, orchestration for anything with money in it.</p>
+      <p>One more distinction worth carrying, because it decides your payload design:</p>
+      <div class="tw"><table>
+        <thead><tr><th>Style</th><th>Payload</th><th>Trade-off</th></tr></thead>
+        <tbody>
+        <tr><td><strong>Event notification</strong></td><td>Just the ID</td><td>Tiny; consumers must call back for details</td></tr>
+        <tr><td><strong>Event-carried state</strong></td><td>Full snapshot</td><td>No callback needed; payloads grow and go stale</td></tr>
+        <tr><td><strong>Event sourcing</strong></td><td>Events <em>are</em> the database</td><td>Perfect audit and replay; genuinely hard, rarely needed</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+  </div>
+
+  <div class="recap"><h4>Jargon used in this section</h4><dl>
+    <dt>event-driven</dt><dd>Components announce facts; interested parties subscribe. The producer does not know its consumers.</dd>
+    <dt>event bus / broker</dt><dd>The thing in the middle. In-memory inside one process, or Kafka/SNS across the network.</dd>
+    <dt>publish / subscribe</dt><dd>Publishing announces an event; subscribing registers interest in one.</dd>
+    <dt>transactional outbox</dt><dd>Writing events to your own database in the same transaction as the data, then relaying them, so a crash cannot lose them.</dd>
+    <dt>dual-write problem</dt><dd>Writing to a database and a broker separately, where a crash between the two leaves them permanently disagreeing.</dd>
+    <dt>at-least-once delivery</dt><dd>The broker guarantees an event arrives, possibly more than once, so handlers must be idempotent.</dd>
+    <dt>choreography vs orchestration</dt><dd>Choreography: everyone reacts independently. Orchestration: one workflow explicitly directs the steps.</dd>
+    <dt>event sourcing</dt><dd>Storing the sequence of events as the source of truth and deriving current state by replaying them.</dd>
+  </dl></div>
+</section>
+
+<section id="pipeline" class="x3">
+  <div class="sechead"><span class="tag">Axis 3 · code inside a unit</span></div>
+  <h2>Pipeline (pipes and filters)</h2>
+  <p class="sub">Data flows one way through independent stages. You have already built one.</p>
+
+  <div class="wwh"><div class="wwh-h"><span class="wwh-n">Why</span><h3>Why arrange code as a sequence</h3></div>
+  <p>Because some work genuinely is a sequence of transformations, and modelling it as anything else makes it worse. Reading a file, parsing it, enriching each record, storing the result: there is a natural order, each step is independent, and nothing needs to talk backwards.</p>
+  <p>When the shape fits, you get properties that are hard to buy any other way: each stage is testable alone, stages can be reordered or inserted without touching neighbours, and slow stages can be scaled independently.</p></div>
+
+  <div class="wwh"><div class="wwh-h"><span class="wwh-n">What it does</span><h3>What defines it</h3></div>
+  <p>Each stage, traditionally called a <em>filter</em>, receives data, transforms it, and passes it on. A stage knows the shape of the data and nothing about its neighbours. The connections between them are the <em>pipes</em>.</p>
+  <p>You already use pipelines constantly: <code>cat log | grep error | sort | uniq -c</code>, compilers (lex → parse → optimise → emit), ETL jobs, Fastify's hook chain, and any queue-based job flow that moves records through stages.</p></div>
+
+  <div class="wwh"><div class="wwh-h"><span class="wwh-n">How</span><h3>When to reach for it, and when not</h3></div>
+  <p>Reach for it when the flow is one-directional and each stage is close to a pure transformation. Avoid it when stages need to negotiate back and forth, share mutable state, or when the flow branches heavily. At that point you are fighting the shape and should use events or a plain orchestrator instead.</p></div>
+
+  <div class="eli"><button class="eli-t">Explain like I'm five <span class="chev">›</span></button><div class="eli-b">
+    <p>Think of a car wash.</p>
+    <p>The car rolls in dirty. First station sprays water. Next station scrubs. Next rinses. Next blows it dry. Car rolls out clean.</p>
+    <p>Each station does <strong>one job</strong> and does not know or care what the other stations do. The scrubber does not know a dryer exists: it just scrubs and pushes the car forward.</p>
+    <p>Because of that, you can add a wax station in the middle without rebuilding the car wash. And if drying is the slow bit, you can put in two dryers.</p>
+    <p>But a car wash only works because cars go <em>one way</em>. If a car had to roll backwards to get re-scrubbed after drying, the whole design falls apart. That is when a pipeline is the wrong shape.</p>
+  </div></div>
+
+  <div class="lv" data-lv>
+    <div class="lv-bar" role="tablist">
+      <button role="tab" aria-selected="true">Basic</button>
+      <button role="tab" aria-selected="false">Intermediate</button>
+      <button role="tab" aria-selected="false">Advanced</button>
+    </div>
+    <div class="lv-pane on" role="tabpanel">
+      <p class="lvl-note">Level 1: the shape, in the shell and in code.</p>
+<pre>$ cat access.log | grep ERROR | cut -d' ' -f4 | sort | uniq -c
+
+<i># four stages. none knows about the others.</i>
+<i># each reads text, writes text, and stops thinking.</i></pre>
+      <p>The same thing in application code:</p>
+<pre>type Stage&lt;A, B&gt; = (input: A) =&gt; Promise&lt;B&gt;
+
+const fetch:  Stage&lt;Url, Raw&gt;      = url =&gt; http.get(url)
+const parse:  Stage&lt;Raw, Record[]&gt; = raw =&gt; xml.parse(raw)
+const enrich: Stage&lt;Record[], Record[]&gt; = rs =&gt; rs.map(addMeta)
+const store:  Stage&lt;Record[], void&gt; = rs =&gt; db.insertMany(rs)
+
+<i>// composed:</i>
+<em>await store(await enrich(await parse(await fetch(url))))</em></pre>
+    </div>
+    <div class="lv-pane" role="tabpanel">
+      <p class="lvl-note">Level 2: composition, and why streaming matters.</p>
+      <p>Nested calls get ugly fast, so pipelines are usually composed:</p>
+<pre>const pipeline = compose(fetch, parse, enrich, store)
+await pipeline(url)
+
+<i>// adding a stage is now a one-line edit, no neighbours touched:</i>
+const pipeline = compose(fetch, parse, <u>validate</u>, enrich, store)</pre>
+      <p>The failure that catches everyone: loading everything into memory between stages. With 34 million records this dies.</p>
+<pre><i>// ✗ each stage materialises the FULL dataset</i>
+<s>const all = await parse(raw)      // 34M records in RAM</s>
+
+<i>// ✓ stream: records flow through one at a time</i>
+await pipeline(
+  fs.createReadStream('dump.xml'),
+  <em>parseStream()</em>,
+  <em>enrichStream()</em>,
+  <em>batchInsertStream(1000)</em>
+)
+<i>// constant memory, regardless of input size.</i>
+<i>// backpressure is automatic: a slow writer slows the reader.</i></pre>
+    </div>
+    <div class="lv-pane" role="tabpanel">
+      <p class="lvl-note">Level 3: durable pipelines and where stages become distributed.</p>
+      <p>An in-process pipeline dies with the process. For long jobs you make each stage a queue, which gives you retries, persistence and independent scaling per stage:</p>
+<pre><i>// each stage = its own queue and worker</i>
+new Worker(<b>'fetch'</b>,  async job =&gt; {
+  const raw = await http.get(job.data.url)
+  <em>await parseQueue.add('parse', { raw })</em>       <i>hand off</i>
+})
+
+new Worker(<b>'parse'</b>,  async job =&gt; { ... }, { concurrency: 4  })
+new Worker(<b>'enrich'</b>, async job =&gt; { ... }, { <u>concurrency: 20</u> })  <i>← the slow one</i>
+new Worker(<b>'store'</b>,  async job =&gt; { ... }, { concurrency: 2  })</pre>
+      <p>Now you have independently tunable stages, and you have also quietly become distributed, so every rule from that section applies: stages must be idempotent, because a worker crash means the job is retried.</p>
+      <p>Two design points that separate a real pipeline from a fragile one:</p>
+      <ul>
+        <li><strong>Failure routing.</strong> One bad record must not stop 34 million good ones. Bad records go to a dead-letter queue for inspection; the pipeline continues.</li>
+        <li><strong>Per-stage observability.</strong> Measure throughput and depth at each stage. The stage whose queue grows without bound is your bottleneck, and this is the only easy way to find it.</li>
+      </ul>
+      <p>Finally, note how the patterns compose rather than compete. A realistic request in a well-built system is all of them at once:</p>
+<pre>An <b>HTTP adapter</b> <i>(hexagonal)</i> in the <b>app tier</b> <i>(multi-tier)</i>
+invokes a use case that publishes <b>OrderPlaced</b> <i>(event-driven)</i>,
+which a worker picks up and runs through
+<b>fetch → validate → enrich → persist</b> <i>(pipeline)</i>.</pre>
+      <p>Four axis-3 patterns, one request, no conflict. Choose per module by what that module's work actually looks like: transformation work wants a pipeline, fan-out work wants events, business-rule work wants ports and adapters.</p>
+    </div>
+  </div>
+
+  <div class="recap"><h4>Jargon used in this section</h4><dl>
+    <dt>pipeline / pipes and filters</dt><dd>Data flows one way through independent stages, each transforming and passing along.</dd>
+    <dt>filter / stage</dt><dd>One step in a pipeline. Knows the data shape, knows nothing about its neighbours.</dd>
+    <dt>streaming</dt><dd>Passing records through the pipeline a few at a time instead of materialising the whole dataset, giving constant memory use.</dd>
+    <dt>backpressure</dt><dd>A slow stage automatically slowing the stages feeding it, instead of dropping work or exhausting memory.</dd>
+    <dt>dead-letter queue</dt><dd>Where records that repeatedly fail get parked, so one bad item cannot halt the whole run.</dd>
+    <dt>ETL</dt><dd>Extract, transform, load: the classic data pipeline shape.</dd>
+  </dl></div>
+</section>
+<section id="wizard" class="x0">
+  <div class="sechead"><span class="tag">Decide</span></div>
+  <h2>Pick yours</h2>
+  <p class="sub">Three questions. One sentence out the other end.</p>
+
+  <p>Every architecture choice on this page collapses into a single sentence with three slots: <em>one repo layout, one deployment shape, one internal structure</em>. Answer these and read yours below.</p>
+
+  <div class="wiz">
+    <div class="wq" data-q="0">
+      <p>1. How many teams have genuinely separate release governance?</p>
+      <div class="wopts">
+        <button data-i="0">Just us</button>
+        <button data-i="1">A few, same org</button>
+        <button data-i="2">Separate orgs, or open source</button>
+      </div>
+    </div>
+    <div class="wq" data-q="1">
+      <p>2. Can you name a forcing function for splitting a backend module out?</p>
+      <div class="wopts">
+        <button data-i="0">No, not really</button>
+        <button data-i="1">Yes: different scaling or runtime</button>
+        <button data-i="2">Yes: teams truly cannot share a release train</button>
+      </div>
+    </div>
+    <div class="wq" data-q="2">
+      <p>3. How many independent frontend teams ship to the same app?</p>
+      <div class="wopts">
+        <button data-i="0">One or two</button>
+        <button data-i="1">About three</button>
+        <button data-i="2">Four or more</button>
+      </div>
+    </div>
+    <div id="wout">Answer all three and your architecture sentence appears here.</div>
+  </div>
+
+  <h3>The complete map</h3>
+  <div class="tw"><table>
+    <thead><tr><th>Term</th><th>Axis</th><th>What it actually is</th><th>Reach for it when</th></tr></thead>
+    <tbody>
+    <tr><td><strong>Monorepo</strong></td><td>1 · repo</td><td>One repository holding many projects</td><td>Almost always: the cheap default</td></tr>
+    <tr><td><strong>Polyrepo</strong></td><td>1 · repo</td><td>One repository per project</td><td>Separately governed teams, or open source</td></tr>
+    <tr><td><strong>Modular monolith</strong></td><td>2 · deploy</td><td>One deployable process, enforced internal modules</td><td>Default, until a forcing function appears</td></tr>
+    <tr><td><strong>Distributed architecture</strong></td><td>2 · deploy</td><td>Umbrella: parts in separate processes over a network</td><td>Only with a named forcing function</td></tr>
+    <tr><td><strong>Build-time MFEs</strong></td><td>2 · deploy</td><td>Frontend packages bundled into one app</td><td>Several frontend teams, one release train</td></tr>
+    <tr><td><strong>Runtime MFEs</strong></td><td>2 · deploy</td><td>Separately deployed bundles stitched in the browser</td><td>4+ teams that truly cannot coordinate deploys</td></tr>
+    <tr><td><strong>Hexagonal</strong></td><td>3 · inside</td><td>Ports and adapters; domain imports nothing</td><td>Always</td></tr>
+    <tr><td><strong>Onion</strong></td><td>3 · inside</td><td>Same rule, drawn as concentric rings</td><td>Always: same thing, other vocabulary</td></tr>
+    <tr><td><strong>Clean</strong></td><td>3 · inside</td><td>Same rule, plus named use cases and presenters</td><td>Always: same thing, other vocabulary</td></tr>
+    <tr><td><strong>Layered / multi-tier</strong></td><td>3 · inside</td><td>Group by technical role; tiers are physical</td><td>CRUD-ish work; the easy starting point</td></tr>
+    <tr><td><strong>Event-driven</strong></td><td>3 · inside</td><td>Producers announce, consumers subscribe</td><td>Fan-out work; many reactions to one fact</td></tr>
+    <tr><td><strong>Pipeline</strong></td><td>3 · inside</td><td>One-way flow through independent stages</td><td>Transformation work; ETL, parsing, batch jobs</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="key"><span class="lbl">The default answer for most teams</span><p>Monorepo. One deployed service with enforced internal modules that own their data. Ports and adapters inside each module. Frontend composed at build time. Nothing distributed until something specific forces it.</p></div>
+</section>
+
+<section id="quiz" class="x0">
+  <div class="sechead"><span class="tag">Retain</span></div>
+  <h2>Test yourself</h2>
+  <p class="sub">Five questions targeting the exact places people get confused.</p>
+  <div id="quizbox"></div>
+  <p id="qscore" style="font-family:var(--mono);font-size:13px;color:var(--dim2);margin-top:18px"></p>
+</section>
+
+<section id="glossary" class="x0">
+  <div class="sechead"><span class="tag">Reference</span></div>
+  <h2>Jargon glossary</h2>
+  <p class="sub">Every dotted-underlined term on this page, in one place.</p>
+  <p>Terms marked with a dotted underline anywhere above are defined here, and hovering or tapping one shows its definition on the spot: every single time it appears, not just the first. Repetition is the point.</p>
+  <input id="gsearch" type="search" placeholder="Filter terms: try &quot;idempotent&quot; or &quot;port&quot;" aria-label="Filter glossary">
+  <dl class="gl" id="gl"></dl>
+</section>
+
+
+<section id="reading" class="x0">
+  <div class="sechead"><span class="tag">Further reading</span></div>
+  <h2>Where these ideas come from</h2>
+  <p class="sub">Primary sources, grouped by the axis they belong to.</p>
+
+  <p>Almost every term on this page traces back to one specific article by one specific person. Reading the original is usually faster than reading the hundred blog posts that summarise it, and it tells you what the author actually claimed as opposed to what the internet decided they meant.</p>
+
+  <h3>Axis 1: where code lives</h3>
+  <div class="res">
+<a class="ritem r1" href="https://cacm.acm.org/research/why-google-stores-billions-of-lines-of-code-in-a-single-repository/" target="_blank" rel="noopener"><b>Why Google Stores Billions of Lines of Code in a Single Repository</b><em>Potvin and Levenberg, 2016. The canonical monorepo reference: two billion lines, one repository, and an honest accounting of what tooling it took to make that work.</em><cite>cacm.acm.org/research/why-google-stores-billions-of-lines-of-code-in-a-single-repository/</cite></a><a class="ritem r1" href="https://nx.dev/docs/kb/what-is-a-monorepo" target="_blank" rel="noopener"><b>What is a Monorepo?</b><em>Nx documentation. Practical rather than philosophical: workspaces versus build systems, affected detection, remote caching, and how the tools compare.</em><cite>nx.dev/docs/kb/what-is-a-monorepo</cite></a>
+  </div>
+
+  <h3>Axis 2: what you deploy</h3>
+  <div class="res">
+<a class="ritem r2" href="https://martinfowler.com/bliki/MonolithFirst.html" target="_blank" rel="noopener"><b>MonolithFirst</b><em>Martin Fowler, 2015. The short argument for starting with a monolith, built on the observation that successful microservice systems almost always began as one.</em><cite>martinfowler.com/bliki/MonolithFirst.html</cite></a><a class="ritem r2" href="https://martinfowler.com/microservices/" target="_blank" rel="noopener"><b>Microservices Guide</b><em>Martin Fowler. A collected index rather than a single article, including the costs side of the ledger and the counterargument that starting monolith-first is wrong.</em><cite>martinfowler.com/microservices/</cite></a><a class="ritem r2" href="https://microservices.io/patterns/" target="_blank" rel="noopener"><b>Microservices Pattern Language</b><em>Chris Richardson. The reference catalogue for everything distribution forces on you: saga, transactional outbox, API composition, CQRS.</em><cite>microservices.io/patterns/</cite></a><a class="ritem r2" href="https://microservices.io/patterns/data/saga.html" target="_blank" rel="noopener"><b>Pattern: Saga</b><em>Chris Richardson. The specific answer to the transaction you lose when you split two modules into two services.</em><cite>microservices.io/patterns/data/saga.html</cite></a><a class="ritem r2" href="https://martinfowler.com/articles/micro-frontends.html" target="_blank" rel="noopener"><b>Micro Frontends</b><em>Cam Jackson on martinfowler.com, 2019. The article that named the pattern, and it is careful about the build-time versus runtime distinction that most summaries drop.</em><cite>martinfowler.com/articles/micro-frontends.html</cite></a><a class="ritem r2" href="https://webpack.js.org/concepts/module-federation/" target="_blank" rel="noopener"><b>Module Federation</b><em>The official webpack concept page. Worth reading for the shared-dependency rules alone, since that is where runtime micro-frontends actually break.</em><cite>webpack.js.org/concepts/module-federation/</cite></a><a class="ritem r2" href="https://module-federation.io/" target="_blank" rel="noopener"><b>Module Federation documentation</b><em>The current standalone docs site, covering Rspack and Vite as well as webpack, plus type hints across remote boundaries.</em><cite>module-federation.io/</cite></a>
+  </div>
+
+  <h3>Axis 3: how code is arranged inside</h3>
+  <div class="res">
+<a class="ritem r3" href="https://alistair.cockburn.us/hexagonal-architecture/" target="_blank" rel="noopener"><b>Hexagonal Architecture</b><em>Alistair Cockburn, 2005. The original. Short, and it explains why the hexagon has six sides, which is to say: for no reason at all.</em><cite>alistair.cockburn.us/hexagonal-architecture/</cite></a><a class="ritem r3" href="https://jeffreypalermo.com/2008/07/the-onion-architecture-part-1/" target="_blank" rel="noopener"><b>The Onion Architecture, part 1</b><em>Jeffrey Palermo, 2008. Four short parts. Same dependency rule as hexagonal, drawn as rings, with an explicit comparison against traditional layering.</em><cite>jeffreypalermo.com/2008/07/the-onion-architecture-part-1/</cite></a><a class="ritem r3" href="https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html" target="_blank" rel="noopener"><b>The Clean Architecture</b><em>Robert C. Martin, 2012. The synthesis of the other two, and the source of the phrase "the Dependency Rule" that everyone now quotes.</em><cite>blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html</cite></a><a class="ritem r3" href="https://jmgarridopaz.github.io/" target="_blank" rel="noopener"><b>Hexagonal Architecture explained</b><em>Juan Manuel Garrido de Paz. A long-running expansion of Cockburn's article, written with his input, with worked code examples.</em><cite>jmgarridopaz.github.io/</cite></a>
+  </div>
+
+  <h3>Books worth the time</h3>
+  <div class="books">
+    <h4>If you only read one, read the first</h4>
+    <ul>
+      <li><strong>Fundamentals of Software Architecture</strong>, Mark Richards and Neal Ford. The catalogue this page is a subset of: layered, pipeline, microkernel, service-based, event-driven, space-based, microservices, each with a characteristics rating. It is the book that makes "architectural style" a useful category rather than a vague one.</li>
+      <li><strong>Designing Data-Intensive Applications</strong>, Martin Kleppmann. The definitive treatment of everything in the distributed section: replication, partitioning, consistency, and exactly why that timeout has no answer.</li>
+      <li><strong>Building Microservices</strong>, Sam Newman. Second edition. Practical and notably honest about the costs, including a chapter on when not to.</li>
+      <li><strong>Microservices Patterns</strong>, Chris Richardson. The book form of microservices.io, with worked Java examples for saga, outbox and API composition.</li>
+      <li><strong>Micro Frontends in Action</strong>, Michael Geers. Covers every composition technique, not just Module Federation: iframes, web components, server-side includes, and build-time.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <div class="fbars" aria-hidden="true"><i></i><i></i><i></i></div>
+  <p class="slogan">Name the question before you argue the answer.</p>
+  <p class="fnote">Every system has an architecture. The only real choice is whether you picked it on purpose.</p>
+</footer>
+</main>
+</div>
+<button id="totop" aria-label="Back to top" title="Back to top">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+</button>
+
+<script>
+(function(){
+'use strict';
+
+/* ============ 1. JARGON DICTIONARY ============ */
+const J = {
+ "monorepo":"One version-control repository holding many projects. A storage choice only: it says nothing about how many things you deploy.",
+ "polyrepo":"One repository per project. Shared code becomes a published, versioned package. Also called multi-repo.",
+ "multi-repo":"One repository per project. Shared code becomes a published, versioned package. Also called polyrepo.",
+ "atomic commit":"A single commit that changes several projects together, so the codebase is never left half-updated.",
+ "affected graph":"The build tool's calculation of which projects depend on your changed files, so CI only rebuilds those.",
+ "diamond dependency":"Two things you depend on require conflicting versions of the same third thing. The classic polyrepo pain.",
+ "CODEOWNERS":"A file mapping folders to the people who must review changes there. How ownership is enforced in a monorepo.",
+ "modular monolith":"One deployable process containing modules with enforced boundaries, each owning its own data.",
+ "monolith":"A single deployable unit containing the whole application. Not the same word as monorepo.",
+ "deployable artifact":"The single built thing you ship: a container image, a jar, a zip. Counting these is how you count deploy units.",
+ "deploy unit":"One thing that can be shipped independently. The number of these is what makes a system distributed or not.",
+ "module boundary":"The rule that outside code may only use a module's public entry point: checked by CI, not trusted.",
+ "idempotency key":"A unique ID sent with a request so retrying it does not perform the action twice.",
+ "idempotent":"Safe to run more than once with the same result. Essential once retries exist.",
+ "saga":"A sequence of local steps each with a compensating undo action, replacing a transaction you no longer have.",
+ "compensating action":"The undo step in a saga: release the reservation, refund the charge.",
+ "distributed architecture":"Any system whose parts run in separate processes and communicate over a network. The umbrella term.",
+ "microservices":"The backend form of distributed architecture: many small, independently deployed services.",
+ "eventual consistency":"Parts of the system are briefly out of sync and converge later, rather than all agreeing instantly.",
+ "circuit breaker":"A wrapper that stops calling a failing dependency for a while, so its failure does not exhaust your resources.",
+ "backpressure":"A signal from a slow consumer telling the producer to slow down, instead of dropping work or running out of memory.",
+ "distributed tracing":"Tagging a request with an ID that travels across services, so one user action can be reconstructed from many logs.",
+ "correlation ID":"The identifier attached to a request so its journey across services can be stitched together in logs.",
+ "blast radius":"How much of the system a single failure or deploy can damage.",
+ "partition tolerance":"Continuing to function when the network splits and parts cannot reach each other. Partitions happen whether you plan for them or not.",
+ "build-time micro-frontends":"Frontend packages composed into one application by the bundler. One deploy unit, not distributed.",
+ "runtime micro-frontends":"The architectural style: separately deployed frontend bundles fetched and combined in the browser at load time. Many deploy units, so distributed. Module Federation is one tool that implements it.",
+ "micro-frontends":"Splitting a frontend into independently owned pieces. Build-time keeps one deploy unit; runtime creates many.",
+ "Module Federation":"A tool, not a style. The webpack and Vite mechanism implementing runtime micro-frontends: remotes expose modules, hosts import them over HTTP. Alternatives include import maps, single-spa and web components.",
+ "remoteEntry.js":"The manifest file a remote publishes, listing what it exposes and which dependencies it expects to share.",
+ "remote":"In Module Federation, a separately deployed bundle that exposes components for others to load at runtime.",
+ "shell":"The application that owns routing and layout and hosts the other frontend pieces. Also called the host.",
+ "host":"The application that loads and composes remotes. Also called the shell.",
+ "bundler":"The tool (Vite, webpack, esbuild) that compiles your source and dependencies into files the browser can load.",
+ "code splitting":"Producing several bundle files from one build so the browser loads them on demand. Still one deploy unit.",
+ "singleton":"A shared-dependency setting forcing exactly one copy of a library like React across all bundles. Omitting it breaks hooks.",
+ "version skew":"Independently deployed parts holding incompatible versions of a shared dependency. A runtime-only failure your CI cannot catch.",
+ "error boundary":"A React component that catches a rendering failure below it, so one broken remote does not blank the whole page.",
+ "feature flag":"A runtime switch turning a feature on or off without deploying: release independence, cheaply.",
+ "trunk-based development":"Everyone merges to main continuously, keeping unfinished work behind flags rather than in long-lived branches.",
+ "port":"An interface the domain declares describing something it needs. Named for the need, never for the vendor.",
+ "adapter":"A class in infrastructure implementing a port using a real tool: Prisma, Stripe, S3.",
+ "dependency inversion":"High-level code depends on an interface it owns; low-level code implements it. This is what makes dependencies point inward.",
+ "domain":"The code expressing business rules, free of frameworks and storage concerns.",
+ "infrastructure":"The code that talks to the outside world: databases, HTTP, queues, third-party APIs.",
+ "use case":"Clean Architecture's name for one application operation, orchestrating entities through ports. Also called an interactor.",
+ "interactor":"Clean Architecture's name for the object implementing one use case.",
+ "anemic domain model":"Entities reduced to bare data with no behaviour, all rules pushed into services. Looks like hexagonal, is not.",
+ "composition root":"The single startup file where real adapters are constructed and injected. The only place both sides meet.",
+ "ORM":"Object-relational mapper (Prisma, Hibernate) translating between database rows and objects. A classic thing to keep out of the domain.",
+ "entity":"An object with identity and behaviour that carries business rules: an Order, a Customer.",
+ "layer":"A logical grouping of code by technical role: controllers, services, repositories. A folder.",
+ "tier":"A physical deployment boundary: browser, app server, database. A machine or process, not a folder.",
+ "MVC":"Model-View-Controller. The controller handles input, updates the model, and the view renders it.",
+ "MVP":"Model-View-Presenter. A presenter mediates everything and the view is passive, which makes the view testable.",
+ "MVVM":"Model-View-ViewModel. The view binds declaratively to a view-model and the framework syncs them.",
+ "MVU":"Model-View-Update. Strictly unidirectional UI flow: the Elm and Redux shape.",
+ "reducer":"A pure function taking the current state and an action and returning the next state.",
+ "BFF":"Backend for frontend: a thin server layer shaping data for one specific client, so mobile and web can differ without changing the domain.",
+ "CRUD":"Create, read, update, delete. Applications that are mostly forms over a database, with few real business rules.",
+ "event-driven":"Components announce facts and interested parties subscribe. The producer does not know its consumers.",
+ "event bus":"The thing in the middle of an event-driven system. In-memory inside one process, or Kafka/SNS across the network.",
+ "broker":"The networked event bus: Kafka, RabbitMQ, SNS. Turning your bus into one makes the system distributed.",
+ "publish":"To announce an event onto the bus without knowing who will react.",
+ "subscribe":"To register interest in a kind of event, so your handler runs whenever one is published.",
+ "transactional outbox":"Writing events into your own database in the same transaction as the data, then relaying them, so a crash cannot lose them.",
+ "dual-write problem":"Writing to a database and a broker separately, where a crash between the two leaves them permanently disagreeing.",
+ "at-least-once delivery":"The broker guarantees an event arrives, possibly more than once, so handlers must be idempotent.",
+ "choreography":"Every component reacts to events independently, with no central director. Flexible; hard to trace.",
+ "orchestration":"One explicit workflow directs the steps in order and owns the compensations. Traceable; more centralised.",
+ "event sourcing":"Storing the sequence of events as the source of truth and deriving current state by replaying them.",
+ "pipeline":"Data flowing one way through independent stages, each transforming and passing along. Also called pipes and filters.",
+ "pipes and filters":"The formal name for the pipeline pattern: filters transform, pipes connect them.",
+ "filter":"One stage in a pipeline. Knows the shape of the data, knows nothing about its neighbours.",
+ "streaming":"Passing records through a pipeline a few at a time rather than materialising the whole dataset, giving constant memory use.",
+ "dead-letter queue":"Where records that repeatedly fail are parked, so one bad item cannot halt an entire run.",
+ "ETL":"Extract, transform, load. The classic data pipeline shape.",
+ "bounded context":"Domain-driven design's term for a boundary within which a model and its vocabulary are consistent. Usually what a module should be.",
+ "architectural style":"The overall shape of a system or of a unit inside it: modular monolith, microservices, layered, event-driven, pipeline. Not a tool.",
+ "architectural pattern":"A reusable solution to a recurring problem within a style: saga, transactional outbox, ports and adapters, circuit breaker.",
+ "coupling":"How much one piece of code must know about another. Most of this page is about deciding where to allow it."
+};
+
+/* ============ 2. AUTO-ANNOTATE JARGON EVERYWHERE ============ */
+const terms = Object.keys(J).sort((a,b)=>b.length-a.length);
+const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+const RX = new RegExp('\\b(' + terms.map(esc).join('|') + ')(s|es)?\\b','gi');
+const RXTEST = new RegExp('\\b(' + terms.map(esc).join('|') + ')(s|es)?\\b','i');
+const canon = {}; terms.forEach(t=>canon[t.toLowerCase()]=t);
+
+function annotate(){
+  const els = new Set();
+  document.querySelectorAll('main p, main li, main td, main dd').forEach(e=>{
+    if(e.closest('#glossary,.recap,pre,#tip,footer')) return;
+    els.add(e);
+  });
+  els.forEach(el=>{
+    const used = new Set();
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, {
+      acceptNode(n){
+        if(n.parentElement.closest('code,pre,.jg')) return NodeFilter.FILTER_REJECT;
+        return RXTEST.test(n.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      }
+    });
+    const targets=[]; let n;
+    while(n=walker.nextNode()) targets.push(n);
+    targets.forEach(node=>{
+      RX.lastIndex = 0;
+      const frag = document.createDocumentFragment();
+      let last=0, m, txt=node.nodeValue, hit=false;
+      while((m = RX.exec(txt))!==null){
+        const key = canon[m[1].toLowerCase()];
+        if(!key || used.has(key)) continue;
+        used.add(key); hit=true;
+        frag.appendChild(document.createTextNode(txt.slice(last,m.index)));
+        const span = document.createElement('span');
+        span.className='jg'; span.textContent=m[0];
+        span.dataset.term=key; span.tabIndex=0;
+        span.setAttribute('role','button');
+        span.setAttribute('aria-label', m[0]+': '+J[key]);
+        frag.appendChild(span);
+        last = m.index + m[0].length;
+      }
+      if(!hit) return;
+      frag.appendChild(document.createTextNode(txt.slice(last)));
+      node.parentNode.replaceChild(frag, node);
+    });
+  });
+}
+
+/* ============ 3. TOOLTIP ============ */
+const tip = document.getElementById('tip');
+let tipFor = null;
+function showTip(el){
+  const t = el.dataset.term;
+  tip.innerHTML = '<span class="tt">'+t+'</span>'+J[t];
+  tip.style.display='block';
+  const r = el.getBoundingClientRect(), tr = tip.getBoundingClientRect();
+  let left = r.left + r.width/2 - tr.width/2;
+  left = Math.max(10, Math.min(left, window.innerWidth - tr.width - 10));
+  let top = r.bottom + 9;
+  if(top + tr.height > window.innerHeight - 10) top = r.top - tr.height - 9;
+  tip.style.left = left+'px'; tip.style.top = Math.max(8,top)+'px';
+  tipFor = el;
+}
+function hideTip(){ tip.style.display='none'; tipFor=null; }
+document.addEventListener('mouseover', e=>{ const j=e.target.closest('.jg'); if(j) showTip(j); });
+document.addEventListener('mouseout',  e=>{ const j=e.target.closest('.jg'); if(j && j===tipFor) hideTip(); });
+document.addEventListener('focusin',   e=>{ const j=e.target.closest('.jg'); if(j) showTip(j); });
+document.addEventListener('focusout',  e=>{ if(e.target.closest('.jg')) hideTip(); });
+document.addEventListener('click', e=>{
+  const j=e.target.closest('.jg');
+  if(j){ (tipFor===j) ? hideTip() : showTip(j); }
+  else if(!e.target.closest('#tip')) hideTip();
+});
+window.addEventListener('scroll', ()=>{ if(tipFor) hideTip(); }, {passive:true});
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') hideTip(); });
+
+/* ============ 4. ELI5 TOGGLES ============ */
+document.querySelectorAll('.eli-t').forEach(btn=>{
+  const box = btn.parentElement;
+  btn.setAttribute('aria-expanded','false');
+  btn.addEventListener('click', ()=>{
+    const open = box.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open?'true':'false');
+  });
+});
+const eliAll = document.getElementById('eliAll');
+eliAll.addEventListener('click', ()=>{
+  const next = eliAll.getAttribute('aria-pressed')!=='true';
+  eliAll.setAttribute('aria-pressed', next?'true':'false');
+  eliAll.textContent = next ? 'Close all ELI5' : 'Open all ELI5';
+  document.querySelectorAll('.eli').forEach(b=>{
+    b.classList.toggle('open', next);
+    b.querySelector('.eli-t').setAttribute('aria-expanded', next?'true':'false');
+  });
+});
+
+/* ============ 5. LEVEL TABS ============ */
+document.querySelectorAll('[data-lv]').forEach(box=>{
+  const tabs = [...box.querySelectorAll('.lv-bar button')];
+  const panes = [...box.querySelectorAll('.lv-pane')];
+  tabs.forEach((tab,i)=>{
+    tab.addEventListener('click', ()=>{
+      tabs.forEach((t,k)=>t.setAttribute('aria-selected', k===i?'true':'false'));
+      panes.forEach((p,k)=>p.classList.toggle('on', k===i));
+    });
+  });
+});
+
+/* ============ 6. SCROLL SPY + COMPASS + PROGRESS ============ */
+const secs = [...document.querySelectorAll('main section')];
+const links = [...document.querySelectorAll('#side a')];
+const bars = [document.getElementById('cb1'),document.getElementById('cb2'),document.getElementById('cb3')];
+const prog = document.getElementById('prog');
+
+function axOf(sec){
+  if(sec.classList.contains('x1')) return 1;
+  if(sec.classList.contains('x2')) return 2;
+  if(sec.classList.contains('x3')) return 3;
+  return 0;
+}
+function onScroll(){
+  const h = document.documentElement;
+  prog.style.width = (h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';
+  const line = document.getElementById('top').offsetHeight + 80;
+  let cur = secs[0];
+  for(const s of secs){ if(s.getBoundingClientRect().top <= line) cur = s; }
+  // at the very bottom the last section is always the one being read
+  if(h.scrollTop + h.clientHeight >= h.scrollHeight - 4) cur = secs[secs.length-1];
+  const ax = axOf(cur);
+  bars.forEach((b,i)=>{
+    b.className = 'cbar' + (ax===i+1 ? ' on'+(i+1) : '');
+  });
+  toTop.classList.toggle('on', h.scrollTop > 700);
+  const id = '#'+cur.id;
+  links.forEach(a=>{
+    const on = a.getAttribute('href')===id;
+    a.className = on ? 'act n'+(a.dataset.ax||'0') : '';
+  });
+}
+window.addEventListener('scroll', onScroll, {passive:true});
+
+/* ============ 7. WIZARD ============ */
+const ans = [null,null,null];
+document.querySelectorAll('.wq').forEach(q=>{
+  const qi = +q.dataset.q;
+  q.querySelectorAll('button').forEach(b=>{
+    b.addEventListener('click',()=>{
+      ans[qi] = +b.dataset.i;
+      q.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed', x===b?'true':'false'));
+      renderWiz();
+    });
+  });
+});
+function renderWiz(){
+  const out = document.getElementById('wout');
+  if(ans.some(a=>a===null)){
+    out.innerHTML = 'Answer all three and your architecture sentence appears here.';
+    return;
+  }
+  const repo = ans[0]===2 ? 'Polyrepo' : 'Monorepo';
+  const repoWhy = ans[0]===2
+    ? 'Separate governance or public code is one of the few real reasons to split repositories.'
+    : 'Atomic cross-project commits and one dependency version beat the coordination cost. Add a workspace tool so CI only builds what changed.';
+
+  let deploy, deployWhy;
+  if(ans[1]===0){
+    deploy = 'one deployed service with enforced internal modules';
+    deployWhy = 'No forcing function means no distribution. A modular monolith scales horizontally perfectly well: you run more copies of the same container.';
+  } else if(ans[1]===1){
+    deploy = 'a modular monolith with that one module extracted';
+    deployWhy = 'Different scaling or runtime is a genuine reason. Extract that module alone and leave everything else in place: one service, not a migration.';
+  } else {
+    deploy = 'a modular monolith now with a planned split along team lines';
+    deployWhy = 'Release-train conflict is real, but try feature flags and trunk-based development first: they buy release independence far more cheaply than distribution does.';
+  }
+
+  let fe, feWhy;
+  if(ans[2]===0){
+    fe = 'a single frontend app';
+    feWhy = 'One or two teams do not need micro-frontends of any kind. Plain packages and folders are enough.';
+  } else if(ans[2]===1){
+    fe = 'build-time micro-frontends';
+    feWhy = 'Workspace packages give you ownership and reviews without a runtime. Add feature flags for independent release timing.';
+  } else {
+    fe = 'build-time micro-frontends, with runtime worth evaluating';
+    feWhy = 'Four or more teams is the threshold where Module Federation can pay off. Still try feature flags first: version skew is a runtime failure your CI cannot catch.';
+  }
+
+  out.innerHTML =
+    '<span class="verdict">'+repo+', '+deploy+', ports and adapters inside each module, and '+fe+'.</span>'+
+    '<strong style="color:var(--a1)">Axis 1: repo.</strong> '+repoWhy+'<br><br>'+
+    '<strong style="color:var(--a2)">Axis 2: deployment.</strong> '+deployWhy+' On the frontend: '+feWhy+'<br><br>'+
+    '<strong style="color:var(--a3)">Axis 3: inside.</strong> Always do this, from day one. It is free (just discipline about which way imports point) and it is what makes the axis 2 answer reversible later.';
+}
+
+/* ============ 8. QUIZ ============ */
+const QZ = [
+ {q:'A company uses a monorepo. How many services do they deploy?',
+  a:['Exactly one','Many','You cannot tell from that'],c:2,
+  f:'Repo layout and deployment are different axes. Google runs a monorepo with thousands of services; plenty of startups run a monorepo with one. The repo tells you nothing about deploy units.'},
+ {q:'Which of these is NOT a distributed architecture?',
+  a:['Runtime micro-frontends via Module Federation','A modular monolith using in-process events','Microservices talking over gRPC','Services communicating through Kafka'],c:1,
+  f:'Event-driven is not the same as distributed. If the bus is an in-memory emitter inside one process, no call crosses a network, so nothing is distributed. Swap it for Kafka and it becomes distributed.'},
+ {q:'The cart team fixes a bug in a build-time micro-frontend setup. What must be redeployed?',
+  a:['Only the cart bundle','The whole shell application','Nothing: it hot-reloads','Only the CDN cache'],c:1,
+  f:'Build-time means the bundler compiles everything into one artifact. The cart team has code ownership but not deploy independence, which is exactly why it is really a modular monolith written in React.'},
+ {q:'grep -r "prisma" src/domain/ returns several hits, all type imports. What does that mean?',
+  a:['Fine: type imports are erased at compile time','You do not actually have hexagonal architecture','You should switch to Clean Architecture instead'],c:1,
+  f:'A type import is still a dependency pointing outward. Your domain now changes when the database schema changes, which is the exact coupling the pattern exists to prevent. The domain must own its own types.'},
+ {q:'Which single change turns any of these patterns into a distributed system?',
+  a:['Adding more modules','Splitting the repository','Putting a network hop between two parts','Introducing an event bus'],c:2,
+  f:'Distribution is defined by the process boundary, nothing else. Modules, repos and event buses all live happily inside one process. The moment a call travels over a network, you inherit timeouts, retries and partial failure.'}
+];
+let score=0, answered=0;
+const qb = document.getElementById('quizbox');
+QZ.forEach((item,qi)=>{
+  const d = document.createElement('div'); d.className='qz';
+  d.innerHTML = '<p>'+(qi+1)+'. '+item.q+'</p><div class="qopts"></div><div class="qfb"></div>';
+  const opts = d.querySelector('.qopts'), fb = d.querySelector('.qfb');
+  item.a.forEach((txt,ai)=>{
+    const b=document.createElement('button'); b.textContent=txt;
+    b.addEventListener('click',()=>{
+      if(d.dataset.done) return;
+      d.dataset.done='1'; answered++;
+      [...opts.children].forEach((x,xi)=>{
+        x.disabled=true;
+        if(xi===item.c) x.classList.add('right');
+        else if(xi===ai) x.classList.add('wrong');
+      });
+      if(ai===item.c) score++;
+      fb.textContent = (ai===item.c?'Correct. ':'Not quite. ') + item.f;
+      fb.classList.add('on');
+      document.getElementById('qscore').textContent = 'Score: '+score+' / '+answered+' answered';
+    });
+    opts.appendChild(b);
+  });
+  qb.appendChild(d);
+});
+
+/* ============ 9. GLOSSARY ============ */
+const gl = document.getElementById('gl');
+Object.keys(J).sort((a,b)=>a.toLowerCase().localeCompare(b.toLowerCase())).forEach(k=>{
+  const d=document.createElement('div'); d.className='gitem';
+  d.innerHTML = '<dt>'+k+'</dt><dd>'+J[k]+'</dd>';
+  gl.appendChild(d);
+});
+document.getElementById('gsearch').addEventListener('input', e=>{
+  const q = e.target.value.toLowerCase().trim();
+  [...gl.children].forEach(it=>{
+    it.style.display = !q || it.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+});
+
+links.forEach(a=>a.addEventListener('click',()=>{
+  links.forEach(x=>x.className='');
+  a.className = 'act n'+(a.dataset.ax||'0');
+  setTimeout(onScroll, 700);
+}));
+
+
+/* ============ 10. ENTANGLEMENT DEMO ============ */
+(function(){
+const svgNS='http://www.w3.org/2000/svg';
+const N={
+  orders   :{x:238,y:16, w:164,h:44,label:'Orders'},
+  catalog  :{x:16, y:103,w:150,h:44,label:'Catalog'},
+  inventory:{x:245,y:103,w:150,h:44,label:'Inventory'},
+  billing  :{x:474,y:103,w:150,h:44,label:'Billing'},
+  shipping :{x:245,y:190,w:150,h:44,label:'Shipping'}
+};
+const EDGES={
+  tangled:[['orders','inventory'],['orders','billing'],['orders','shipping'],['orders','catalog'],
+           ['billing','orders'],['shipping','inventory'],['catalog','inventory'],['billing','shipping'],
+           ['catalog','orders']],
+  modular:[['orders','inventory'],['orders','billing'],['orders','shipping']]
+};
+const S=[
+ { name:'Rename a column in inventory',
+   tangled:{hot:['inventory','orders','catalog','shipping'],src:'inventory',a:'4',b:'11',c:'Days',
+     code:"<i>-- you rename inventory.stock.qty to quantity</i>\n\n<s>orders/service.ts       SELECT qty FROM stock ...</s>\n<s>catalog/availability.ts SELECT qty FROM stock ...</s>\n<s>shipping/picklist.ts    JOIN stock s ON s.qty > 0</s>\n\n<i># three other modules read that table directly.</i>\n<i># nothing warned you. you find out in production.</i>",
+     v:"<b>Four modules break from a one-column rename.</b> Nothing in the code said Catalog was allowed to read inventory tables, and nothing stopped it. This is entanglement: the cost of a change has no relationship to its size."},
+   modular:{hot:['inventory'],src:'inventory',a:'1',b:'2',c:'Minutes',
+     code:"<i>-- you rename inventory.stock.qty to quantity</i>\n\n<em>inventory/repository.ts</em>   the only file with that SQL\n<em>inventory/mapper.ts</em>       maps the row to a domain type\n\n<i># no other module can see that table.</i>\n<i># they call inventory.getStock(sku) and get a domain</i>\n<i># object back, whose shape you did not change.</i>",
+     v:"<b>The change stops at the module wall.</b> Because only Inventory touches its own tables, the schema is a private detail. The public interface never mentioned a column name, so nothing outside had anything to break."}},
+ { name:'Swap the payment provider',
+   tangled:{hot:['billing','orders','shipping'],src:'billing',a:'3',b:'8',c:'A week',
+     code:"<i>// Stripe objects leaked out of billing long ago</i>\n\n<s>orders/checkout.ts    import Stripe from 'stripe'</s>\n<s>orders/refund.ts      charge.id, charge.balance_transaction</s>\n<s>shipping/cod.ts       stripe.paymentIntents.retrieve(...)</s>\n\n<i># the vendor's data model IS your data model now.</i>",
+     v:"<b>The vendor spread past its own module.</b> Once Stripe types appear in Orders and Shipping, switching provider means rewriting business logic in modules that have nothing to do with payments."},
+   modular:{hot:['billing'],src:'billing',a:'1',b:'1',c:'An hour',
+     code:"<i>// billing declared what it needed, not what Stripe offers</i>\n\ninterface <em>PaymentGateway</em> { charge(a: Money): Promise&lt;Receipt&gt; }\n\n<i>// swapping provider = one new adapter, one wiring line</i>\n<s>- payments: new StripeGateway(KEY)</s>\n<em>+ payments: new RazorpayGateway(KEY)</em>\n\n<i># orders and shipping never knew the vendor's name.</i>",
+     v:"<b>One adapter, one line.</b> This is the hexagonal payoff from axis 3 doing real work: the port was named for the business need, so no other module ever learned who processes the payment."}},
+ { name:'Move inventory to its own service',
+   tangled:{hot:['inventory','orders','catalog','shipping'],src:'inventory',a:'4',b:'40+',c:'A quarter',
+     code:"<i>// you want inventory on its own box with more memory</i>\n\n<s>✗ orders   joins inventory tables inside a transaction</s>\n<s>✗ catalog  joins inventory tables in its list query</s>\n<s>✗ shipping writes to inventory tables directly</s>\n\n<i># extraction means a data migration plus rewriting</i>\n<i># every one of those call sites. this is not a move.</i>\n<i># it is a rewrite with a deadline attached.</i>",
+     v:"<b>Extraction is off the table.</b> You cannot move a module whose tables four other modules read. The distributed option from axis 2 was never available, and you only discover that on the day you need it."},
+   modular:{hot:['inventory'],src:'inventory',a:'1',b:'1',c:'An afternoon',
+     code:"<i>// every caller already went through a port</i>\n\n<s>- const inventory: InventoryPort = new LocalInventory(svc)</s>\n<em>+ const inventory: InventoryPort = new HttpInventory(URL)</em>\n\n<i># calls were already async and already interface-typed.</i>\n<i># now do the distributed homework: idempotency keys,</i>\n<i># timeouts, and a saga where you used to have a</i>\n<i># database transaction.</i>",
+     v:"<b>Configuration, not rewrite.</b> This is the whole argument for the modular monolith: it does not make you distributed, it keeps distribution available. Note the homework in the comments, though. The seam is cheap, the network never is."}}
+];
+
+const gE=document.getElementById('dEdges'), gN=document.getElementById('dNodes');
+if(!gE) return;
+let mode='tangled', pick=0;
+
+function anchor(n,tx,ty){
+  const cx=n.x+n.w/2, cy=n.y+n.h/2, dx=tx-cx, dy=ty-cy;
+  if(!dx&&!dy) return [cx,cy];
+  const s=Math.min(dx?(n.w/2+5)/Math.abs(dx):1e9, dy?(n.h/2+5)/Math.abs(dy):1e9);
+  return [cx+dx*s, cy+dy*s];
+}
+function el(t,attrs,cls){
+  const e=document.createElementNS(svgNS,t);
+  for(const k in attrs) e.setAttribute(k,attrs[k]);
+  if(cls) e.setAttribute('class',cls);
+  return e;
+}
+function draw(){
+  const sc=S[pick][mode];
+  gE.textContent=''; gN.textContent='';
+  EDGES[mode].forEach(([a,b])=>{
+    const A=N[a], B=N[b];
+    const p1=anchor(A,B.x+B.w/2,B.y+B.h/2), p2=anchor(B,A.x+A.w/2,A.y+A.h/2);
+    const live = sc.hot.indexOf(a)>-1 && sc.hot.indexOf(b)>-1;
+    gE.appendChild(el('line',{x1:p1[0],y1:p1[1],x2:p2[0],y2:p2[1]},'dedge'+(live?' hot':'')));
+  });
+  for(const k in N){
+    const n=N[k];
+    const cls='dnode'+(k===sc.src?' src':(sc.hot.indexOf(k)>-1?' hot':''));
+    const g=el('g',{},cls);
+    g.appendChild(el('rect',{x:n.x,y:n.y,width:n.w,height:n.h,rx:8}));
+    const t=el('text',{x:n.x+n.w/2,y:n.y+n.h/2,'text-anchor':'middle','dominant-baseline':'central'});
+    t.textContent=n.label; g.appendChild(t); gN.appendChild(g);
+  }
+  document.getElementById('dA').textContent=sc.a;
+  document.getElementById('dB').textContent=sc.b;
+  document.getElementById('dC').textContent=sc.c;
+  document.querySelectorAll('#tangle .dstat').forEach(s=>s.classList.toggle('ok',mode==='modular'));
+  document.getElementById('dCode').innerHTML=sc.code;
+  document.getElementById('dVerdict').innerHTML=sc.v;
+}
+document.querySelectorAll('#tangle .demo-toggle button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    mode=b.dataset.mode;
+    document.querySelectorAll('#tangle .demo-toggle button').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));
+    draw();
+  });
+});
+document.querySelectorAll('#tangle .demo-scen button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    pick=+b.dataset.s;
+    document.querySelectorAll('#tangle .demo-scen button').forEach(x=>x.setAttribute('aria-pressed',x===b?'true':'false'));
+    draw();
+  });
+});
+draw();
+})();
+
+const toTop = document.getElementById('totop');
+toTop.addEventListener('click', ()=>{
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+  toTop.blur();
+});
+
+/* ============ INIT ============ */
+annotate();
+onScroll();
+})();
+</script>
+</body>
+</html>
