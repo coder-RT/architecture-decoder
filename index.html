@@ -1651,7 +1651,7 @@ which a worker picks up and runs through
   <div class="sechead"><span class="tag">Reference</span></div>
   <h2>Jargon glossary</h2>
   <p class="sub">Every dotted-underlined term on this page, in one place.</p>
-  <p>Terms marked with a dotted underline anywhere above are defined here, and hovering or tapping one shows its definition on the spot: every single time it appears, not just the first. Repetition is the point.</p>
+  <p>Terms marked with a dotted underline anywhere above are defined here, and hovering or tapping one shows its definition on the spot. The underline comes back each time a term resurfaces later in the page, not just at its first mention. Repetition is the point.</p>
   <input id="gsearch" type="search" placeholder="Filter terms: try &quot;idempotent&quot; or &quot;port&quot;" aria-label="Filter glossary">
   <dl class="gl" id="gl"></dl>
 </section>
@@ -1719,7 +1719,7 @@ const J = {
  "modular monolith":"One deployable process containing modules with enforced boundaries, each owning its own data. It does not imply a single database, a single datastore technology, or any particular folder layout. The essential property is one deploy unit plus real internal boundaries.",
  "monolith":"A single deployable unit containing the whole application. Not the same word as monorepo.",
  "deployable artifact":"The single built thing you ship: a container image, a jar, a zip. Counting these is how you count deploy units.",
- "deploy unit":"One thing that can be shipped independently. The number of these is what makes a system distributed or not.",
+ "deploy unit":"One thing that can be shipped independently. Counting them is the fastest test for distribution, though the real line is whether parts run in separate processes over a network.",
  "module boundary":"The rule that outside code may only use a module's public entry point: checked by CI, not trusted.",
  "idempotency key":"A unique ID sent with a request so retrying it does not perform the action twice.",
  "idempotent":"Safe to run more than once with the same result. Essential once retries exist.",
