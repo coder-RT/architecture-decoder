@@ -379,7 +379,7 @@ footer{padding:46px 0 64px;color:var(--dim2);font-family:var(--mono);font-size:1
     <rect class="sv-box" style="stroke:var(--a3)" x="505" y="174" width="170" height="52" rx="7"/>
     <text class="sv-t" x="590" y="204" text-anchor="middle">Events / Pipeline</text>
   </svg>
-  <figcaption>You pick one from each row. "Modular monolith in a monorepo with hexagonal modules" is one coherent sentence, not three competing choices.</figcaption>
+  <figcaption>You answer each row. "Modular monolith in a monorepo with hexagonal modules" is one coherent sentence, not three competing choices.</figcaption>
   </figure>
 
   <div class="eli"><button class="eli-t">Explain like I'm five <span class="chev">›</span></button><div class="eli-b">
@@ -687,7 +687,7 @@ const inventoryPort: InventoryPort = <u>new HttpInventoryAdapter('https://invent
 
   <div class="wwh"><div class="wwh-h"><span class="wwh-n">Why</span><h3>Why anyone accepts the pain</h3></div>
   <p>Distributed architecture is not a maturity level you graduate to. It is a trade: you accept an entire category of new failures in exchange for something specific. If you cannot name the something, do not trade.</p>
-  <p>The legitimate reasons, and there are only about five:</p>
+  <p>The reasons that come up most often:</p>
   <ul>
     <li><strong>Divergent scaling</strong>: image processing needs 16 GB and a GPU, your API needs 512 MB. Scaling them together burns money.</li>
     <li><strong>Divergent runtime</strong>: the ML piece is Python, the rest is Node.</li>
@@ -695,7 +695,8 @@ const inventoryPort: InventoryPort = <u>new HttpInventoryAdapter('https://invent
     <li><strong>Isolation</strong>: a regulated or untrusted workload that must not share a process.</li>
     <li><strong>Availability asymmetry</strong>: checkout must stay up while reporting is being redeployed.</li>
   </ul>
-  <p>Notice what is missing: "it scales better", "it is cleaner", "it is what real companies do". A modular monolith scales horizontally perfectly well: you run more copies of the same container. Scaling and splitting are different things.</p></div>
+  <p>That list is the common ground, not a closed set. Others are real but rarer: data residency rules forcing EU data onto EU infrastructure, systems you acquired rather than built, a boundary around code you do not control, and strangler-fig migrations where the split is a transitional state rather than the target.</p>
+  <p>Notice what is missing from all of them: "it scales better", "it is cleaner", "it is what real companies do". A modular monolith scales horizontally perfectly well: you run more copies of the same container. Scaling and splitting are different things.</p></div>
 
   <div class="wwh"><div class="wwh-h"><span class="wwh-n">What it does</span><h3>What the word actually covers</h3></div>
   <p>A distributed architecture is any system whose parts run in separate processes and communicate over a network. Microservices are distributed. Runtime micro-frontends are distributed. A Kafka-based event system is distributed. A modular monolith is not, no matter how many modules it has.</p>
@@ -909,8 +910,9 @@ export function CartWidget() {
   <p class="sub">The style. Module Federation is one tool that implements it.</p>
 
   <div class="wwh"><div class="wwh-h"><span class="wwh-n">Why</span><h3>Why anyone does this</h3></div>
-  <p>One reason, and it is organisational rather than technical: you have several frontend teams that genuinely cannot share a release train. Team A must ship at 3pm Tuesday without waiting for Team B's failing test to be fixed.</p>
-  <p>That is it. There is no performance reason, no scalability reason, no cleanliness reason. If independent deploy is not the thing you desperately need, this is all cost.</p></div>
+  <p>The dominant reason is organisational rather than technical: you have several frontend teams that genuinely cannot share a release train. Team A must ship at 3pm Tuesday without waiting for Team B's failing test to be fixed.</p>
+  <p>There is one other legitimate reason, and it is structural: <strong>you do not have the code at build time.</strong> Plugin and marketplace architectures where third parties ship UI into your shell cannot bundle what has not been written yet. Framework migrations hit the same wall, which is why an Angular shell hosting React remotes is a real pattern rather than a mistake.</p>
+  <p>Outside those two, the case is thin. There is no performance reason, no scalability reason, no cleanliness reason. If neither independent deploy nor unknown-at-build-time code is what you need, this is all cost.</p></div>
 
   <div class="wwh"><div class="wwh-h"><span class="wwh-n">What it does</span><h3>What actually happens</h3></div>
   <p>Each team builds and deploys its own bundle to its own URL. The shell fetches those bundles at runtime, in the browser, and stitches them into one running application. Nobody rebuilds anybody.</p>
