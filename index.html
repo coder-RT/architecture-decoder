@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark">
 <title>The Architecture Decoder: ten software architecture terms, three real questions</title>
 <meta name="description" content="Monorepo, modular monolith, micro-frontends, hexagonal, clean, onion, event-driven, pipeline, layered, distributed. A software architecture field guide that shows these ten terms answer three unrelated questions, with plain-language explanations, three depth levels and code examples.">
 <meta name="theme-color" content="#0F1319">
@@ -45,7 +46,7 @@
   --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,'Liberation Mono','Courier New',monospace;
 }
 *{box-sizing:border-box}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;color-scheme:dark}
 @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
 body{margin:0;background:var(--ink);color:var(--text);font-family:var(--body);
   font-size:16.5px;line-height:1.62;-webkit-font-smoothing:antialiased}
@@ -58,7 +59,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opa
 #prog{position:fixed;top:0;left:0;height:2px;width:0;z-index:80;
   background:linear-gradient(90deg,var(--a1),var(--a2) 50%,var(--a3));transition:width .12s linear}
 
-#top{position:sticky;top:0;z-index:60;background:rgba(15,19,25,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+#top{position:sticky;top:0;z-index:60;background:rgba(15,19,25,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top)}
 .topin{max-width:1180px;margin:0 auto;padding:10px 22px;display:flex;align-items:center;gap:18px}
 .brand{font-family:var(--disp);font-weight:800;font-size:15px;letter-spacing:-.02em;white-space:nowrap}
 .brand span{color:var(--dim2);font-family:var(--mono);font-weight:400;font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-left:9px}
@@ -99,7 +100,7 @@ h1 em{font-style:normal;display:block;color:var(--dim2)}
 .lede{font-size:clamp(17px,2.3vw,19.5px);color:var(--dim);max-width:60ch;margin:0 0 14px;line-height:1.55}
 .lede strong{color:var(--text);font-weight:600}
 
-section{padding:60px 0;border-bottom:1px solid var(--line);scroll-margin-top:70px}
+section{padding:60px 0;border-bottom:1px solid var(--line);scroll-margin-top:calc(70px + env(safe-area-inset-top))}
 .sechead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:8px}
 .tag{font-family:var(--mono);font-size:10px;letter-spacing:.11em;text-transform:uppercase;padding:4px 9px;border-radius:4px;border:1px solid;white-space:nowrap}
 .x1 .tag{color:var(--a1);border-color:color-mix(in srgb,var(--a1) 42%,transparent);background:color-mix(in srgb,var(--a1) 9%,transparent)}
@@ -289,14 +290,14 @@ footer{padding:46px 0 64px;color:var(--dim2);font-family:var(--mono);font-size:1
 .fbars i:nth-child(3){background:var(--a3)}
 .slogan{font-family:var(--disp);font-weight:800;font-size:clamp(23px,3.8vw,33px);line-height:1.1;
   letter-spacing:-.032em;color:var(--text);max-width:19ch;margin:0 0 18px}
-#totop{position:fixed;right:22px;bottom:22px;z-index:70;width:44px;height:44px;border-radius:50%;
+#totop{position:fixed;right:max(22px,env(safe-area-inset-right));bottom:max(22px,env(safe-area-inset-bottom));z-index:70;width:44px;height:44px;border-radius:50%;
   display:grid;place-items:center;cursor:pointer;background:var(--ink3);border:1px solid var(--line2);
   color:var(--dim);opacity:0;visibility:hidden;transform:translateY(10px);
   transition:opacity .25s,transform .25s,visibility .25s,color .16s,border-color .16s,background .16s}
 #totop.on{opacity:1;visibility:visible;transform:none}
 #totop:hover{color:var(--text);border-color:var(--a2);background:color-mix(in srgb,var(--a2) 14%,var(--ink3))}
 #totop svg{width:17px;height:17px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
-@media(max-width:560px){#totop{right:14px;bottom:14px;width:40px;height:40px}}
+@media(max-width:560px){#totop{right:max(14px,env(safe-area-inset-right));bottom:max(14px,env(safe-area-inset-bottom))}}
 
 /* reading time */
 .rtime{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim2);margin-left:auto}
@@ -315,7 +316,7 @@ footer{padding:46px 0 64px;color:var(--dim2);font-family:var(--mono);font-size:1
 
 /* mobile navigation */
 #navbtn{display:none;background:var(--ink3);border:1px solid var(--line2);color:var(--dim);
-  width:34px;height:34px;border-radius:8px;cursor:pointer;place-items:center;flex:0 0 auto}
+  width:44px;height:44px;border-radius:8px;cursor:pointer;place-items:center;flex:0 0 auto}
 #navbtn svg{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round}
 #navbtn:hover{color:var(--text)}
 #scrim{position:fixed;inset:0;background:rgba(8,10,14,.72);z-index:90;opacity:0;visibility:hidden;
@@ -323,11 +324,11 @@ footer{padding:46px 0 64px;color:var(--dim2);font-family:var(--mono);font-size:1
 #scrim.on{opacity:1;visibility:visible}
 #sheet{position:fixed;top:0;left:0;bottom:0;width:min(310px,86vw);background:var(--ink2);z-index:91;
   border-right:1px solid var(--line);transform:translateX(-100%);transition:transform .26s cubic-bezier(.4,0,.2,1);
-  overflow-y:auto;padding:18px 0 40px}
+  overflow-y:auto;padding:18px 0 40px;padding-top:calc(18px + env(safe-area-inset-top));padding-bottom:calc(40px + env(safe-area-inset-bottom));padding-left:env(safe-area-inset-left)}
 #sheet.on{transform:none}
 #sheet .sh-h{display:flex;align-items:center;padding:0 18px 16px;border-bottom:1px solid var(--line);margin-bottom:14px}
 #sheet .sh-h b{font-family:var(--disp);font-weight:800;font-size:15px;letter-spacing:-.02em;color:var(--text)}
-#sheet .sh-x{margin-left:auto;background:none;border:0;color:var(--dim2);font-size:22px;cursor:pointer;line-height:1;padding:0 4px}
+#sheet .sh-x{margin-left:auto;background:none;border:0;color:var(--dim2);font-size:22px;cursor:pointer;line-height:1;width:44px;height:44px}
 #sheet .sh-x:hover{color:var(--text)}
 #sheet .navgrp{padding-left:18px}
 #sheet a{display:block;font-size:14.5px;color:var(--dim);text-decoration:none;padding:8px 18px;
