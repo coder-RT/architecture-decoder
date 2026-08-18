@@ -74,7 +74,7 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opa
 .tbtn:hover{color:var(--text);border-color:var(--dim2)}
 .tbtn[aria-pressed="true"]{background:var(--paper);color:var(--paperink);border-color:var(--paper);font-weight:600}
 @media(max-width:880px){.compass b{display:none}.cbar{width:24px}.topin{padding:9px 15px;gap:11px}}
-@media(max-width:560px){.brand span{display:none}.tbtn{padding:5px 10px;font-size:10px}}
+@media(max-width:560px){.brand span{display:none}.tbtn{padding:5px 10px;font-size:10px}.compass{display:none}}
 
 .shell{max-width:1180px;margin:0 auto;padding:0 22px;display:grid;grid-template-columns:210px 1fr;gap:44px;position:relative;z-index:1}
 @media(max-width:960px){.shell{grid-template-columns:1fr;gap:0;padding:0 16px}}
@@ -1232,7 +1232,7 @@ export interface OrderRepository { save(o: <em>Order</em>): Promise&lt;void&gt; 
   <p>The reason hexagonal exists is that layered tends to leak: the business layer imports the persistence layer's entities, and now your domain knows about your ORM after all.</p></div>
 
   <div class="wwh"><div class="wwh-h"><span class="wwh-n">What it does</span><h3>Layer versus tier: the distinction worth having</h3></div>
-  <p>A <strong>layer</strong> is logical: a folder, a package, a namespace. A <strong>tier</strong> is physical: a separate machine or process. Classic three-tier is browser, application server, database: three tiers. Your backend might have four layers inside the middle tier.</p>
+  <p>A <strong>layer</strong> is logical: a folder, a package, a namespace. A <strong>tier</strong> is a runtime deployment unit: something that can be deployed and scaled on its own, and that you reach across a process or network boundary. Classic three-tier is browser, application server, database. Note that tiers do not require separate machines: all three run on your laptop in development and it is still three-tier, because what makes them tiers is the boundary, not the hardware. Your backend might have four layers inside the middle tier.</p>
   <p>Layered says "group by <em>what kind</em> of code this is". Hexagonal says "group by <em>what the business does</em>, and push technical concerns to the edge". Same axis, competing opinions.</p></div>
 
   <div class="wwh"><div class="wwh-h"><span class="wwh-n">How</span><h3>GUI architectures are the same question for UI code</h3></div>
@@ -1344,7 +1344,8 @@ function cart(state, action) {
   <p>Invert it: the order module announces that an order was placed, and anything that cares subscribes. Adding a sixth reaction touches zero existing code.</p></div>
 
   <div class="wwh"><div class="wwh-h"><span class="wwh-n">What it does</span><h3>The trade you are making</h3></div>
-  <p>You gain extensibility, natural buffering, and resilience to a slow consumer. You lose the ability to read the flow. There is no single file that tells you everything that happens when an order is placed: you have to go find the subscribers.</p>
+  <p>You gain extensibility: adding a consumer touches no existing code. You lose the ability to read the flow, because no single file tells you everything that happens when an order is placed and you have to go find the subscribers.</p>
+  <p>Be precise about what you are actually buying, though. Publish-and-subscribe decouples <em>who knows whom</em>. It does not by itself decouple <em>when things run</em> or <em>what happens when one fails</em>. The in-process bus below awaits each handler in turn, so a slow subscriber still blocks the publisher and a throwing subscriber still surfaces to it. Buffering, retries and resilience to a slow consumer come from putting a queue or broker in the middle, which is a separate decision with its own cost.</p>
   <div class="key"><span class="lbl">Critical point</span><p>Event-driven is <strong>not</strong> the same as distributed. The bus can be an in-memory emitter inside your monolith, or it can be Kafka. Same pattern, wildly different operational cost. In-process domain events give you most of the decoupling benefit for almost none of the price.</p></div></div>
 
   <div class="wwh"><div class="wwh-h"><span class="wwh-n">How</span><h3>How the coupling shapes differ</h3></div>
@@ -1482,7 +1483,8 @@ await db.$transaction(tx =&gt; orders.save(tx, order))
 
   <div class="wwh"><div class="wwh-h"><span class="wwh-n">Why</span><h3>Why arrange code as a sequence</h3></div>
   <p>Because some work genuinely is a sequence of transformations, and modelling it as anything else makes it worse. Reading a file, parsing it, enriching each record, storing the result: there is a natural order, each step is independent, and nothing needs to talk backwards.</p>
-  <p>When the shape fits, you get properties that are hard to buy any other way: each stage is testable alone, stages can be reordered or inserted without touching neighbours, and slow stages can be scaled independently.</p></div>
+  <p>When the shape fits, you get properties that are hard to buy any other way: each stage is testable alone, and stages can be reordered or inserted without touching neighbours.</p>
+  <p>Independent scaling per stage is often listed here too, but it is not a property of the shape. An in-process pipeline runs every stage in the same process at the same concurrency. You only get per-stage scaling once each stage sits behind its own queue with its own workers, which is the level 3 version below and which makes the pipeline distributed.</p></div>
 
   <div class="wwh"><div class="wwh-h"><span class="wwh-n">What it does</span><h3>What defines it</h3></div>
   <p>Each stage, traditionally called a <em>filter</em>, receives data, transforms it, and passes it on. A stage knows the shape of the data and nothing about its neighbours. The connections between them are the <em>pipes</em>.</p>
