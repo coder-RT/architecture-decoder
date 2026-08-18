@@ -74,7 +74,9 @@ body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opa
 .tbtn:hover{color:var(--text);border-color:var(--dim2)}
 .tbtn[aria-pressed="true"]{background:var(--paper);color:var(--paperink);border-color:var(--paper);font-weight:600}
 @media(max-width:880px){.compass b{display:none}.cbar{width:24px}.topin{padding:9px 15px;gap:11px}}
-@media(max-width:560px){.brand span{display:none}.tbtn{padding:5px 10px;font-size:10px}.compass{display:none}}
+@media(max-width:560px){.brand span{display:none}.tbtn{padding:5px 10px;font-size:10px}.compass{display:none}
+  .brand{min-width:0;overflow:hidden;text-overflow:ellipsis}}
+@media(max-width:400px){.topin{padding:9px 12px;gap:9px}.brand{font-size:13.5px}}
 
 .shell{max-width:1180px;margin:0 auto;padding:0 22px;display:grid;grid-template-columns:210px 1fr;gap:44px;position:relative;z-index:1}
 @media(max-width:960px){.shell{grid-template-columns:1fr;gap:0;padding:0 16px}}
@@ -1888,13 +1890,32 @@ eliAll.addEventListener('click', ()=>{
 });
 
 /* ============ 5. LEVEL TABS ============ */
-document.querySelectorAll('[data-lv]').forEach(box=>{
+document.querySelectorAll('[data-lv]').forEach((box,gi)=>{
   const tabs = [...box.querySelectorAll('.lv-bar button')];
   const panes = [...box.querySelectorAll('.lv-pane')];
+  const bar = box.querySelector('.lv-bar');
+  if(bar) bar.setAttribute('aria-label','Depth level');
+  const select = i => {
+    tabs.forEach((t,k)=>{ t.setAttribute('aria-selected', k===i?'true':'false'); t.tabIndex = k===i?0:-1; });
+    panes.forEach((p,k)=>p.classList.toggle('on', k===i));
+  };
   tabs.forEach((tab,i)=>{
-    tab.addEventListener('click', ()=>{
-      tabs.forEach((t,k)=>t.setAttribute('aria-selected', k===i?'true':'false'));
-      panes.forEach((p,k)=>p.classList.toggle('on', k===i));
+    const tid = 'lvt-'+gi+'-'+i, pid = 'lvp-'+gi+'-'+i;
+    tab.id = tid;
+    tab.setAttribute('aria-controls', pid);
+    tab.tabIndex = tab.getAttribute('aria-selected')==='true' ? 0 : -1;
+    if(panes[i]){ panes[i].id = pid; panes[i].setAttribute('aria-labelledby', tid); }
+    tab.addEventListener('click', ()=>select(i));
+    tab.addEventListener('keydown', e=>{
+      const step = e.key==='ArrowRight' ? 1 : e.key==='ArrowLeft' ? -1 : 0;
+      let target = null;
+      if(step) target = (i+step+tabs.length)%tabs.length;
+      else if(e.key==='Home') target = 0;
+      else if(e.key==='End') target = tabs.length-1;
+      if(target===null) return;
+      e.preventDefault();
+      select(target);
+      tabs[target].focus();
     });
   });
 });
