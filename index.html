@@ -4,12 +4,25 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The Architecture Decoder: ten software architecture terms, three real questions</title>
-<meta name="description" content="Monorepo, modular monolith, micro-frontends, hexagonal, clean, onion, event-driven, pipeline, layered, distributed. A software architecture field guide that shows these ten terms answer three unrelated questions, with plain-language explanations, three depth levels and worked code examples.">
+<meta name="description" content="Monorepo, modular monolith, micro-frontends, hexagonal, clean, onion, event-driven, pipeline, layered, distributed. A software architecture field guide that shows these ten terms answer three unrelated questions, with plain-language explanations, three depth levels and code examples.">
 <meta name="theme-color" content="#0F1319">
 <meta property="og:type" content="article">
 <meta property="og:title" content="The Architecture Decoder: ten software architecture terms, three real questions">
 <meta property="og:description" content="Software architecture terms are not ten competing options. They answer three unrelated questions. Learn which question each word belongs to and the confusion stops.">
+<meta property="og:image" content="architecture-decoder-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Ten architecture words. Three real questions.">
+<meta name="twitter:image" content="architecture-decoder-card.png">
 <meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"TechArticle",
+ "headline":"The Architecture Decoder: ten software architecture terms, three real questions",
+ "description":"A field guide showing that ten commonly confused software architecture terms answer three unrelated questions.",
+ "author":{"@type":"Person","name":"Rachit Thariani","sameAs":"https://www.linkedin.com/in/rachit-thariani/"},
+ "datePublished":"2026-08-18","dateModified":"2026-08-18",
+ "inLanguage":"en","image":"architecture-decoder-card.png"}
+</script>
 <meta name="twitter:title" content="The Architecture Decoder">
 <meta name="twitter:description" content="Ten software architecture terms. Three real questions. A field guide with ELI5 explanations and three depth levels per concept.">
 <link rel="dns-prefetch" href="https://fonts.gstatic.com">
@@ -280,6 +293,71 @@ footer{padding:46px 0 64px;color:var(--dim2);font-family:var(--mono);font-size:1
 #totop:hover{color:var(--text);border-color:var(--a2);background:color-mix(in srgb,var(--a2) 14%,var(--ink3))}
 #totop svg{width:17px;height:17px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
 @media(max-width:560px){#totop{right:14px;bottom:14px;width:40px;height:40px}}
+
+/* reading time */
+.rtime{font-family:var(--mono);font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim2);margin-left:auto}
+@media(max-width:520px){.rtime{margin-left:0;width:100%}}
+
+/* copy buttons */
+.prewrap{position:relative}
+.prewrap>pre{margin:15px 0}
+.cpy{position:absolute;top:24px;right:9px;z-index:2;background:var(--ink3);border:1px solid var(--line2);
+  color:var(--dim2);font-family:var(--mono);font-size:10px;letter-spacing:.07em;text-transform:uppercase;
+  padding:5px 9px;border-radius:5px;cursor:pointer;opacity:0;transition:.16s}
+.prewrap:hover .cpy,.cpy:focus{opacity:1}
+.cpy:hover{color:var(--text);border-color:var(--dim2)}
+.cpy.done{color:var(--a3);border-color:var(--a3);opacity:1}
+@media(hover:none){.cpy{opacity:1}}
+
+/* mobile navigation */
+#navbtn{display:none;background:var(--ink3);border:1px solid var(--line2);color:var(--dim);
+  width:34px;height:34px;border-radius:8px;cursor:pointer;place-items:center;flex:0 0 auto}
+#navbtn svg{width:16px;height:16px;stroke:currentColor;stroke-width:2;fill:none;stroke-linecap:round}
+#navbtn:hover{color:var(--text)}
+#scrim{position:fixed;inset:0;background:rgba(8,10,14,.72);z-index:90;opacity:0;visibility:hidden;
+  transition:opacity .22s,visibility .22s;backdrop-filter:blur(3px)}
+#scrim.on{opacity:1;visibility:visible}
+#sheet{position:fixed;top:0;left:0;bottom:0;width:min(310px,86vw);background:var(--ink2);z-index:91;
+  border-right:1px solid var(--line);transform:translateX(-100%);transition:transform .26s cubic-bezier(.4,0,.2,1);
+  overflow-y:auto;padding:18px 0 40px}
+#sheet.on{transform:none}
+#sheet .sh-h{display:flex;align-items:center;padding:0 18px 16px;border-bottom:1px solid var(--line);margin-bottom:14px}
+#sheet .sh-h b{font-family:var(--disp);font-weight:800;font-size:15px;letter-spacing:-.02em;color:var(--text)}
+#sheet .sh-x{margin-left:auto;background:none;border:0;color:var(--dim2);font-size:22px;cursor:pointer;line-height:1;padding:0 4px}
+#sheet .sh-x:hover{color:var(--text)}
+#sheet .navgrp{padding-left:18px}
+#sheet a{display:block;font-size:14.5px;color:var(--dim);text-decoration:none;padding:8px 18px;
+  border-left:2px solid var(--line);line-height:1.35}
+#sheet a:active{color:var(--text)}
+@media(max-width:960px){#navbtn{display:grid}}
+
+/* print */
+@media print{
+  body{background:#fff;color:#111;font-size:11pt}
+  body::before,#top,#side,#totop,#scrim,#sheet,.cpy,.demo-toggle,.demo-scen,#prog,#gsearch{display:none!important}
+  .shell{display:block;max-width:100%;padding:0}
+  main{max-width:100%}
+  a{color:#111;text-decoration:underline}
+  .ritem cite,.flink svg{display:none}
+  h1,h2,h3,h4,.slogan,.fname{color:#000}
+  p,li,td,.sub,.dverdict{color:#222}
+  section{border-bottom:1px solid #ccc;padding:18pt 0;page-break-inside:auto}
+  h2,h3{page-break-after:avoid}
+  pre,figure,table,.eli,.qz{page-break-inside:avoid}
+  pre{background:#f5f5f5;border:1px solid #ddd;color:#111}
+  pre b,pre em,pre u{color:#000}
+  pre i,pre s{color:#555}
+  code{background:#f0f0f0;color:#111}
+  .lv-bar{display:none}
+  .lv-pane{display:block!important;border-top:1px solid #ddd}
+  .eli-b{display:block!important}
+  .eli{background:#fafafa;color:#111;box-shadow:none;border:1px solid #ddd}
+  .eli-b p{color:#111}
+  .jg{background:none;border-bottom:1px dotted #888}
+  .recap,.note,.key,.dg,.wiz{border-color:#ccc;background:#fafafa}
+  .dstat b{color:#111}
+  th{background:#f0f0f0;color:#111}
+}
 </style>
 </head>
 <body>
@@ -288,6 +366,7 @@ footer{padding:46px 0 64px;color:var(--dim2);font-family:var(--mono);font-size:1
 
 <header id="top">
   <div class="topin">
+    <button id="navbtn" aria-label="Open contents" aria-expanded="false" aria-controls="sheet"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
     <div class="brand">The Architecture Decoder<span>3 axes / 10 words</span></div>
     <button class="tbtn" id="eliAll" aria-pressed="false">Open all ELI5</button>
     <div class="compass" aria-hidden="true">
@@ -298,6 +377,12 @@ footer{padding:46px 0 64px;color:var(--dim2);font-family:var(--mono);font-size:1
     </div>
   </div>
 </header>
+
+<div id="scrim" hidden></div>
+<nav id="sheet" aria-label="Contents" aria-hidden="true">
+  <div class="sh-h"><b>Contents</b><button class="sh-x" aria-label="Close contents">&times;</button></div>
+  <div id="sheetlinks"></div>
+</nav>
 
 <div class="shell">
 <nav id="side" aria-label="Contents">
@@ -327,11 +412,12 @@ footer{padding:46px 0 64px;color:var(--dim2);font-family:var(--mono);font-size:1
   <h1>Ten architecture words.<em>Three real questions.</em></h1>
   <p class="lede">Monorepo. Modular monolith. Micro-frontends. Hexagonal, Clean and Onion Architecture. Event-driven, pipeline, layered, distributed. Every architecture discussion drags in these ten terms as though you have to pick a side.</p>
   <p class="lede"><strong>You do not. They answer three unrelated questions,</strong> and most of them were never alternatives to each other. Learn which question each word belongs to and the confusion stops for good.</p>
-  <p class="lede">Every concept below comes with a plain-language explanation, three depth levels from beginner to advanced, working code, and an interactive demo of the problem it solves.</p>
+  <p class="lede">Every concept below comes with a plain-language explanation, three depth levels from beginner to advanced, code examples, and an interactive demo of the problem it solves.</p>
 
   <div class="byline">
     <span class="fby">Written by</span>
     <span class="fname">Rachit Thariani</span>
+    <span class="rtime" id="rtime"></span>
     <a class="flink" href="https://www.linkedin.com/in/rachit-thariani/" target="_blank" rel="noopener">
       LinkedIn
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6"/><path d="M20 4L10 14"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
@@ -2061,6 +2147,97 @@ toTop.addEventListener('click', ()=>{
   window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
   toTop.blur();
 });
+
+
+/* ============ 11. READING TIME ============ */
+(function(){
+  const c=document.querySelector('main').cloneNode(true);
+  c.querySelectorAll('#gl,footer').forEach(n=>n.remove());
+  // a reader picks one depth level, not all three, so count one pane per group
+  c.querySelectorAll('[data-lv]').forEach(box=>{
+    [].slice.call(box.querySelectorAll('.lv-pane'),1).forEach(function(x){ x.remove(); });
+  });
+  const code=[].slice.call(c.querySelectorAll('pre')).reduce((a,p)=>a+(p.textContent.match(/\n/g)||[]).length,0);
+  c.querySelectorAll('pre').forEach(n=>n.remove());
+  const words=(c.textContent.match(/\S+/g)||[]).length;
+  // 200 wpm for technical prose, plus ~1.2s per line of code
+  const mins=Math.round(words/200 + code*1.2/60);
+  const el=document.getElementById('rtime');
+  if(el) el.textContent = mins+' min read';
+})();
+
+/* ============ 12. COPY BUTTONS ============ */
+function copyWorthy(pre){
+  const t=pre.textContent;
+  const lines=t.split('\n').map(l=>l.trim()).filter(Boolean);
+  if(!lines.length) return false;
+  if(/[\u251c\u2514\u2502]/.test(t)) return false;                              // box-drawing tree
+  const strip=l=>l.replace(/\s*(\u2190|<-|#|\/\/|--).*$/,'').trim();
+  if(lines.filter(l=>/^[\w@.\/-]+\/$/.test(strip(l))).length>=lines.length*0.35) return false;  // folder listing
+  if(lines.filter(l=>/^GET /.test(l)).length>=lines.length*0.4) return false;  // illustrative HTTP output
+  if(/\u2190HTTP\u2192|\[ browser \]/.test(t)) return false;                   // tier diagram
+  if(/^(deploy units?|tier \d)/mi.test(t) && !/[{};]/.test(t)) return false;   // annotated pseudo-output
+  return /[{};=()]|^\s*\$ |^\s*[\w@.\/-]+\/\s+@/m.test(t);                     // real syntax, shell, or owners
+}
+document.querySelectorAll('main pre').forEach(pre=>{
+  if(pre.closest('.prewrap')) return;
+  if(!copyWorthy(pre)) return;
+  const wrap=document.createElement('div');
+  wrap.className='prewrap';
+  pre.parentNode.insertBefore(wrap,pre);
+  wrap.appendChild(pre);
+  const b=document.createElement('button');
+  b.className='cpy'; b.type='button'; b.textContent='Copy';
+  b.setAttribute('aria-label','Copy code to clipboard');
+  b.addEventListener('click', async ()=>{
+    const txt=pre.innerText;
+    try{
+      if(navigator.clipboard && window.isSecureContext){ await navigator.clipboard.writeText(txt); }
+      else{
+        const ta=document.createElement('textarea');
+        ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0';
+        document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+      }
+      b.textContent='Copied'; b.classList.add('done');
+    }catch(e){ b.textContent='Press Ctrl+C'; }
+    setTimeout(()=>{ b.textContent='Copy'; b.classList.remove('done'); },1900);
+  });
+  wrap.appendChild(b);
+});
+
+/* ============ 13. MOBILE NAV ============ */
+(function(){
+  const btn=document.getElementById('navbtn'), sheet=document.getElementById('sheet'),
+        scrim=document.getElementById('scrim'), box=document.getElementById('sheetlinks'),
+        closeBtn=sheet.querySelector('.sh-x');
+  // build from the desktop nav so there is one source of truth
+  box.innerHTML = document.getElementById('side').innerHTML;
+  let lastFocus=null;
+  function open(){
+    lastFocus=document.activeElement;
+    scrim.hidden=false;
+    requestAnimationFrame(()=>{ sheet.classList.add('on'); scrim.classList.add('on'); });
+    sheet.setAttribute('aria-hidden','false');
+    btn.setAttribute('aria-expanded','true');
+    document.body.style.overflow='hidden';
+    closeBtn.focus();
+  }
+  function close(){
+    sheet.classList.remove('on'); scrim.classList.remove('on');
+    sheet.setAttribute('aria-hidden','true');
+    btn.setAttribute('aria-expanded','false');
+    document.body.style.overflow='';
+    setTimeout(()=>{ scrim.hidden=true; },260);
+    if(lastFocus) lastFocus.focus();
+  }
+  btn.addEventListener('click',open);
+  closeBtn.addEventListener('click',close);
+  scrim.addEventListener('click',close);
+  box.addEventListener('click',e=>{ if(e.target.closest('a')) close(); });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape' && sheet.classList.contains('on')) close(); });
+  // a resize past the breakpoint should not leave the sheet stuck open
+  window.addEventListener('resize',()=>{ if(window.innerWidth>960 && sheet.classList.contains('on')) close(); });
+})();
 
 /* ============ INIT ============ */
 annotate();
