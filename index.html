@@ -7,16 +7,11 @@
 <meta name="description" content="Monorepo, modular monolith, micro-frontends, hexagonal, clean, onion, event-driven, pipeline, layered, distributed. A software architecture field guide that shows these ten terms answer three unrelated questions, with plain-language explanations, three depth levels and worked code examples.">
 <meta name="theme-color" content="#0F1319">
 <meta property="og:type" content="article">
-<meta property="og:url" content="https://coder-rt.github.io/architecture-decoder/">
 <meta property="og:title" content="The Architecture Decoder: ten software architecture terms, three real questions">
 <meta property="og:description" content="Software architecture terms are not ten competing options. They answer three unrelated questions. Learn which question each word belongs to and the confusion stops.">
-<meta property="og:image" content="https://coder-rt.github.io/architecture-decoder/og-image.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="The Architecture Decoder">
 <meta name="twitter:description" content="Ten software architecture terms. Three real questions. A field guide with ELI5 explanations and three depth levels per concept.">
-<meta name="twitter:image" content="https://coder-rt.github.io/architecture-decoder/og-image.png">
 <link rel="dns-prefetch" href="https://fonts.gstatic.com">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -413,6 +408,10 @@ footer{padding:46px 0 64px;color:var(--dim2);font-family:var(--mono);font-size:1
 
   <p>The trap runs the other way too. Tools get spoken about as though they were architectures, usually because the tool arrived first and the vocabulary followed. Module Federation is the clearest case: it is a bundler feature, not a way of designing software. The style is runtime micro-frontends, and you could implement that style with import maps, single-spa, web components or plain iframes instead.</p>
 
+  <h3>What this model is not</h3>
+  <p>Three axes is a teaching frame, not a complete taxonomy. Some concepts genuinely straddle it. Event-driven is the clearest case: as an in-process bus it is purely an axis 3 choice about how modules talk, but swap in Kafka and it becomes an axis 2 choice too, because you have just created deploy units. Pipeline does the same thing when its stages become separate workers.</p>
+  <p>Treat the axes as dimensions you can vary independently, not as boxes every word drops neatly into. The frame earns its keep by stopping the most common category error, and it does not have to be exhaustive to do that.</p>
+
   <div class="key"><span class="lbl">Two questions, not one</span><p>Before comparing two terms, ask which axis each belongs to, then ask which level each sits at. If either answer differs, they were never competing.</p></div>
 </section>
 
@@ -570,7 +569,7 @@ packages:
 
 
   <div class="wwh"><div class="wwh-h"><span class="wwh-n">What it does</span><h3>What it actually is</h3></div>
-  <p>One process, one deployable artifact, one database connection. Inside it, modules that each own their data and expose an explicit, narrow interface. Modules talk through those interfaces or through in-process events, never by reaching into each other's tables or internal files.</p>
+  <p>One process, one deployable artifact. Inside it, modules that each own their data and expose an explicit, narrow interface. Modules talk through those interfaces or through in-process events, never by reaching into each other's tables or internal files.</p>
   <p>Everything ships together. Fix a checkout bug, rebuild the one image, redeploy. Checkout, orders and catalog all restart, because they are the same process.</p></div>
 
   <div class="wwh"><div class="wwh-h"><span class="wwh-n">How</span><h3>How you enforce the boundaries</h3></div>
@@ -918,7 +917,7 @@ export function CartWidget() {
   <p>This is the same trade as microservices, moved to the client tier. The browser is now assembling a distributed system on every page load, from parts that were built at different times against possibly different dependency versions.</p></div>
 
   <div class="wwh"><div class="wwh-h"><span class="wwh-n">How</span><h3>How the pieces find each other</h3></div>
-  <p>The shell is configured with the URLs of remote entry files. Each remote publishes a manifest of what it exposes and which dependencies it expects to share. At load time the runtime negotiates a single shared copy of React and friends, then dynamically imports the requested component.</p></div>
+  <p>The shell is configured with the URLs of remote entry files. Each remote publishes a runtime container rather than a static manifest: <code>remoteEntry.js</code> is executable JavaScript exposing <code>init</code> and <code>get</code>. At load time the host calls <code>init</code> to negotiate a single shared copy of React and friends, then <code>get</code> to pull the requested component.</p></div>
   <p>Module Federation is the most common way to do this, but it is a bundler feature rather than the architecture itself. The same style can be built with browser-native <strong>import maps</strong>, with <strong>single-spa</strong> as an orchestrator, with <strong>web components</strong> as the composition boundary, or with plain <strong>iframes</strong> when hard isolation matters more than a seamless feel. Angular users will meet <strong>Native Federation</strong>, which is the same idea on web standards rather than webpack internals.</p>
   <p>Worth separating those two things when you evaluate this. Deciding to adopt runtime micro-frontends is an architecture decision with the costs listed below. Deciding to use Module Federation rather than import maps is a tooling decision you can revisit far more cheaply.</p>
 
@@ -983,7 +982,7 @@ federation({
 <i>// without this, one 404 on remoteEntry.js = white screen.</i></pre>
       <p><strong>3. Types do not cross the boundary for free.</strong> TypeScript cannot see into a URL, so you need generated declaration packages published by each remote, which reintroduces exactly the version coordination you were trying to escape.</p>
       <p><strong>4. Everything else gets harder</strong>: end-to-end tests need every remote deployed somewhere; CSS leaks between independently built bundles unless scoped; tracing a bug means correlating three deploy histories; and the design system becomes a shared dependency that drifts per remote.</p>
-      <div class="note"><span class="lbl">The honest threshold</span><p>Below roughly four independent frontend teams, the cost exceeds the benefit. And before you reach for this, try feature flags on a build-time setup: they deliver release independence, which is what you actually wanted, at a fraction of the price.</p></div>
+      <div class="note"><span class="lbl">The honest threshold</span><p>There is no magic team count. The real question is whether independent release governance is worth this much complexity to you, and for most organisations it is not. Before reaching for this, try feature flags on a build-time setup: they deliver release independence, which is what you actually wanted, at a fraction of the price.</p></div>
     </div>
   </div>
 
@@ -991,7 +990,7 @@ federation({
     <dt>runtime micro-frontends</dt><dd>Separately deployed frontend bundles fetched and combined in the browser at load time. Many deploy units: distributed.</dd>
     <dt>Module Federation</dt><dd>The webpack and Vite mechanism that implements this: remotes expose modules, hosts import them over HTTP.</dd>
     <dt>remote</dt><dd>A separately deployed bundle that exposes components for others to load.</dd>
-    <dt>remoteEntry.js</dt><dd>The manifest file a remote publishes, listing what it exposes and what it expects to share.</dd>
+    <dt>remoteEntry.js</dt><dd>The runtime container entry a remote publishes. Not a static manifest: it is executable JavaScript exposing a container with <code>init</code> and <code>get</code>, which the host calls to negotiate shared dependencies and pull modules.</dd>
     <dt>singleton (shared dependency)</dt><dd>A configuration forcing exactly one copy of a library like React across all bundles. Omitting it breaks hooks.</dd>
     <dt>version skew</dt><dd>Independently deployed parts holding incompatible versions of a shared dependency: a runtime-only failure.</dd>
     <dt>error boundary</dt><dd>A React component that catches a rendering failure below it, so one broken remote does not blank the page.</dd>
@@ -1000,7 +999,7 @@ federation({
 <section id="hex" class="x3">
   <div class="sechead"><span class="tag">Axis 3 · code inside a unit</span></div>
   <h2>Hexagonal, Onion, Clean</h2>
-  <p class="sub">One idea, published three times, by three people, with three vocabularies.</p>
+  <p class="sub">One family of ideas, published three times, with three vocabularies and three emphases.</p>
 
   <div class="wwh"><div class="wwh-h"><span class="wwh-n">Why</span><h3>Why this pattern exists</h3></div>
   <p>Because business rules outlive frameworks. Your rule "orders over ₹50,000 need manual approval" will be true in ten years. Prisma, Fastify and Stripe will not necessarily still be your choices. When the rule is welded to the tools, three things go wrong: you cannot test the rule without booting a database, you cannot swap a vendor without rewriting logic, and you cannot read the rules without wading through query code.</p></div>
@@ -1008,11 +1007,11 @@ federation({
   <div class="wwh"><div class="wwh-h"><span class="wwh-n">What it does</span><h3>The single rule underneath all three names</h3></div>
   <div class="key"><span class="lbl">Learn this sentence</span><p>Infrastructure imports the domain. The domain never imports infrastructure.</p></div>
   <p>That is the entire content. The domain declares interfaces describing what it needs; infrastructure provides classes implementing them. Dependencies point inward, toward the business logic.</p>
-  <p>The three names differ only in packaging. <strong>Hexagonal</strong> (Cockburn, 2005) calls the interfaces <em>ports</em> and the implementations <em>adapters</em>, and draws driving adapters on one side and driven adapters on the other. <strong>Onion</strong> (Palermo, 2008) draws the same thing as concentric rings and adds an application-services ring. <strong>Clean</strong> (Martin, 2012) synthesises both and names the artifacts: entities, use cases, controllers, presenters.</p></div>
+  <p>They are not identical, and the differences are real if small. Hexagonal prescribes no internal layering at all; Onion adds rings; Clean additionally specifies how control crosses the boundary. <strong>Hexagonal</strong> (Cockburn, 2005) calls the interfaces <em>ports</em> and the implementations <em>adapters</em>, and draws driving adapters on one side and driven adapters on the other. <strong>Onion</strong> (Palermo, 2008) draws the same thing as concentric rings and adds an application-services ring. <strong>Clean</strong> (Martin, 2012) synthesises both and names the artifacts: entities, use cases, controllers, presenters.</p></div>
   <div class="note"><span class="lbl">On capitalisation</span><p>Hexagonal, Clean and Onion Architecture are capitalised throughout this page because they are proper names, coined in specific articles by specific people. Event-driven, layered, pipeline and distributed stay lowercase because they describe a shape rather than name someone's work. If you ever wonder whether a term is a coined pattern or a plain description, that is the test: can you name the article?</p></div>
 
   <div class="wwh"><div class="wwh-h"><span class="wwh-n">How</span><h3>How to check you have done it</h3></div>
-  <p>Do not argue about diagrams. Run this:</p>
+  <p>The distinctions above are worth knowing, but they are not what determines whether you have the benefit. This is:</p>
 <pre>$ grep -r "prisma\|stripe\|fastify" src/domain/
 
 <em>(no results)</em>   ← you have it. whatever you call it.</pre></div>
@@ -1533,9 +1532,9 @@ which a worker picks up and runs through
     <tr><td><strong>Distributed architecture</strong></td><td>2 · deploy</td><td>Umbrella: parts in separate processes over a network</td><td>Only with a named forcing function</td></tr>
     <tr><td><strong>Build-time MFEs</strong></td><td>2 · deploy</td><td>Frontend packages bundled into one app</td><td>Several frontend teams, one release train</td></tr>
     <tr><td><strong>Runtime MFEs</strong></td><td>2 · deploy</td><td>Separately deployed bundles stitched in the browser</td><td>4+ teams that truly cannot coordinate deploys</td></tr>
-    <tr><td><strong>Hexagonal</strong></td><td>3 · inside</td><td>Ports and adapters; domain imports nothing</td><td>Always</td></tr>
-    <tr><td><strong>Onion</strong></td><td>3 · inside</td><td>Same rule, drawn as concentric rings</td><td>Always: same thing, other vocabulary</td></tr>
-    <tr><td><strong>Clean</strong></td><td>3 · inside</td><td>Same rule, plus named use cases and presenters</td><td>Always: same thing, other vocabulary</td></tr>
+    <tr><td><strong>Hexagonal</strong></td><td>3 · inside</td><td>Ports and adapters; domain imports nothing</td><td>Rules are complex, vendors may change, or the system must last</td></tr>
+    <tr><td><strong>Onion</strong></td><td>3 · inside</td><td>Same rule, concentric rings, an application-services ring</td><td>Same conditions; pick the vocabulary your team knows</td></tr>
+    <tr><td><strong>Clean</strong></td><td>3 · inside</td><td>Same rule, plus named use cases and presenters</td><td>Same conditions; pick the vocabulary your team knows</td></tr>
     <tr><td><strong>Layered / multi-tier</strong></td><td>3 · inside</td><td>Group by technical role; tiers are physical</td><td>CRUD-ish work; the easy starting point</td></tr>
     <tr><td><strong>Event-driven</strong></td><td>3 · inside</td><td>Producers announce, consumers subscribe</td><td>Fan-out work; many reactions to one fact</td></tr>
     <tr><td><strong>Pipeline</strong></td><td>3 · inside</td><td>One-way flow through independent stages</td><td>Transformation work; ETL, parsing, batch jobs</td></tr>
@@ -1622,7 +1621,7 @@ const J = {
  "affected graph":"The build tool's calculation of which projects depend on your changed files, so CI only rebuilds those.",
  "diamond dependency":"Two things you depend on require conflicting versions of the same third thing. The classic polyrepo pain.",
  "CODEOWNERS":"A file mapping folders to the people who must review changes there. How ownership is enforced in a monorepo.",
- "modular monolith":"One deployable process containing modules with enforced boundaries, each owning its own data.",
+ "modular monolith":"One deployable process containing modules with enforced boundaries, each owning its own data. It does not imply a single database, a single datastore technology, or any particular folder layout. The essential property is one deploy unit plus real internal boundaries.",
  "monolith":"A single deployable unit containing the whole application. Not the same word as monorepo.",
  "deployable artifact":"The single built thing you ship: a container image, a jar, a zip. Counting these is how you count deploy units.",
  "deploy unit":"One thing that can be shipped independently. The number of these is what makes a system distributed or not.",
@@ -1644,7 +1643,7 @@ const J = {
  "runtime micro-frontends":"The architectural style: separately deployed frontend bundles fetched and combined in the browser at load time. Many deploy units, so distributed. Module Federation is one tool that implements it.",
  "micro-frontends":"Splitting a frontend into independently owned pieces. Build-time keeps one deploy unit; runtime creates many.",
  "Module Federation":"A tool, not a style. The webpack and Vite mechanism implementing runtime micro-frontends: remotes expose modules, hosts import them over HTTP. Alternatives include import maps, single-spa and web components.",
- "remoteEntry.js":"The manifest file a remote publishes, listing what it exposes and which dependencies it expects to share.",
+ "remoteEntry.js":"The runtime container entry a remote publishes. Not a static manifest: it is executable JavaScript exposing a container with init and get, which the host calls to negotiate shared dependencies and pull modules at load time.",
  "remote":"In Module Federation, a separately deployed bundle that exposes components for others to load at runtime.",
  "shell":"The application that owns routing and layout and hosts the other frontend pieces. Also called the host.",
  "host":"The application that loads and composes remotes. Also called the shell.",
@@ -1889,7 +1888,7 @@ function renderWiz(){
     '<span class="verdict">'+repo+', '+deploy+', ports and adapters inside each module, and '+fe+'.</span>'+
     '<strong style="color:var(--a1)">Axis 1: repo.</strong> '+repoWhy+'<br><br>'+
     '<strong style="color:var(--a2)">Axis 2: deployment.</strong> '+deployWhy+' On the frontend: '+feWhy+'<br><br>'+
-    '<strong style="color:var(--a3)">Axis 3: inside.</strong> Always do this, from day one. It is free (just discipline about which way imports point) and it is what makes the axis 2 answer reversible later.';
+    '<strong style="color:var(--a3)">Axis 3: inside.</strong> A judgement call, not a universal. For thin CRUD work, controller to service to repository is enough. Invert the dependencies once business rules get complex, several external systems are involved, a vendor might change, or the system has to last. Where it does apply, it is also what makes the axis 2 answer reversible later.';
 }
 
 /* ============ 8. QUIZ ============ */
