@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="Architecture Decoder">
+  <rect width="32" height="32" rx="7" fill="#0F1319"/>
+  <rect x="6" y="8.5" width="20" height="4" rx="2" fill="#8FA6F5"/>
+  <rect x="6" y="14" width="20" height="4" rx="2" fill="#E8A94D"/>
+  <rect x="6" y="19.5" width="20" height="4" rx="2" fill="#58C2A0"/>
+</svg>
