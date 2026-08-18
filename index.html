@@ -889,7 +889,7 @@ release 3: <em>{ totalAmount: number }</em>                 <i>drop the old fiel
 
   <div class="recap"><h4>Jargon used in this section</h4><dl>
     <dt>distributed architecture</dt><dd>Any system whose parts run in separate processes talking over a network. The umbrella term.</dd>
-    <dt>microservices</dt><dd>The backend form of distributed architecture: many small independently deployed services.</dd>
+    <dt>microservices</dt><dd>The backend form of distributed architecture: many independently deployed services. Independent deployability is the defining property, not size.</dd>
     <dt>eventual consistency</dt><dd>Parts of the system are briefly out of sync and converge later, rather than all agreeing instantly.</dd>
     <dt>circuit breaker</dt><dd>A wrapper that stops calling a failing dependency for a while, so its failure does not exhaust your resources.</dd>
     <dt>backpressure</dt><dd>A signal from a slow consumer telling the producer to slow down instead of dropping work.</dd>
@@ -1326,7 +1326,7 @@ function cart(state, action) {
 
   <div class="recap"><h4>Jargon used in this section</h4><dl>
     <dt>layer</dt><dd>A logical grouping of code by technical role: controllers, services, repositories. A folder.</dd>
-    <dt>tier</dt><dd>A physical deployment boundary: browser, app server, database. A machine or process.</dd>
+    <dt>tier</dt><dd>A runtime deployment unit you reach across a process or network boundary: browser, app server, database. Not necessarily a separate machine.</dd>
     <dt>MVC / MVP / MVVM</dt><dd>GUI patterns differing in who updates the view and how it learns about state changes.</dd>
     <dt>Flux / MVU / Redux</dt><dd>Strictly unidirectional UI flow: action → reducer → new state → re-render.</dd>
     <dt>reducer</dt><dd>A pure function taking current state and an action and returning the next state.</dd>
@@ -1626,11 +1626,11 @@ which a worker picks up and runs through
     <tr><td><strong>Modular monolith</strong></td><td>2 · deploy</td><td>One deployable process, enforced internal modules</td><td>Default, until a forcing function appears</td></tr>
     <tr><td><strong>Distributed architecture</strong></td><td>2 · deploy</td><td>Umbrella: parts in separate processes over a network</td><td>Only with a named forcing function</td></tr>
     <tr><td><strong>Build-time MFEs</strong></td><td>2 · deploy</td><td>Frontend packages bundled into one app</td><td>Several frontend teams, one release train</td></tr>
-    <tr><td><strong>Runtime MFEs</strong></td><td>2 · deploy</td><td>Separately deployed bundles stitched in the browser</td><td>4+ teams that truly cannot coordinate deploys</td></tr>
+    <tr><td><strong>Runtime MFEs</strong></td><td>2 · deploy</td><td>Separately deployed bundles stitched in the browser</td><td>Independent release governance is worth the cost</td></tr>
     <tr><td><strong>Hexagonal</strong></td><td>3 · inside</td><td>Ports and adapters; domain imports nothing</td><td>Rules are complex, vendors may change, or the system must last</td></tr>
     <tr><td><strong>Onion</strong></td><td>3 · inside</td><td>Same rule, concentric rings, an application-services ring</td><td>Same conditions; pick the vocabulary your team knows</td></tr>
     <tr><td><strong>Clean</strong></td><td>3 · inside</td><td>Same rule, plus named use cases and presenters</td><td>Same conditions; pick the vocabulary your team knows</td></tr>
-    <tr><td><strong>Layered / multi-tier</strong></td><td>3 · inside</td><td>Group by technical role; tiers are physical</td><td>CRUD-ish work; the easy starting point</td></tr>
+    <tr><td><strong>Layered / multi-tier</strong></td><td>3 · inside</td><td>Group by technical role; layers are logical, tiers are deployed</td><td>CRUD-ish work; the easy starting point</td></tr>
     <tr><td><strong>Event-driven</strong></td><td>3 · inside</td><td>Producers announce, consumers subscribe</td><td>Fan-out work; many reactions to one fact</td></tr>
     <tr><td><strong>Pipeline</strong></td><td>3 · inside</td><td>One-way flow through independent stages</td><td>Transformation work; ETL, parsing, batch jobs</td></tr>
     </tbody>
@@ -1726,7 +1726,7 @@ const J = {
  "saga":"A sequence of local steps each with a compensating undo action, replacing a transaction you no longer have.",
  "compensating action":"The undo step in a saga: release the reservation, refund the charge.",
  "distributed architecture":"Any system whose parts run in separate processes and communicate over a network. The umbrella term.",
- "microservices":"The backend form of distributed architecture: many small, independently deployed services.",
+ "microservices":"The backend form of distributed architecture: many independently deployed services. Independent deployability is the defining property, not size.",
  "eventual consistency":"Parts of the system are briefly out of sync and converge later, rather than all agreeing instantly.",
  "circuit breaker":"A wrapper that stops calling a failing dependency for a while, so its failure does not exhaust your resources.",
  "backpressure":"A signal from a slow consumer telling the producer to slow down, instead of dropping work or running out of memory.",
@@ -1761,7 +1761,7 @@ const J = {
  "ORM":"Object-relational mapper (Prisma, Hibernate) translating between database rows and objects. A classic thing to keep out of the domain.",
  "entity":"An object with identity and behaviour that carries business rules: an Order, a Customer.",
  "layer":"A logical grouping of code by technical role: controllers, services, repositories. A folder.",
- "tier":"A physical deployment boundary: browser, app server, database. A machine or process, not a folder.",
+ "tier":"A runtime deployment unit you reach across a process or network boundary: browser, app server, database. Not necessarily a separate machine, and not a folder.",
  "MVC":"Model-View-Controller. The controller handles input, updates the model, and the view renders it.",
  "MVP":"Model-View-Presenter. A presenter mediates everything and the view is passive, which makes the view testable.",
  "MVVM":"Model-View-ViewModel. The view binds declaratively to a view-model and the framework syncs them.",
